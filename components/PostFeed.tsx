@@ -13,6 +13,17 @@ interface PostWithUser extends Post {
     username: string;
   };
   tags: string[];
+  comments: {
+    id: string;
+    content: string;
+    createdAt: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      profilePicture: string | null;
+    };
+  }[];
 }
 
 export default function PostFeed() {
