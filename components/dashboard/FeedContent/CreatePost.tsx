@@ -40,17 +40,19 @@ import { tags } from "@/lib/constants/tags";
 import LinkUserAvatar from "@/components/LinkUserAvatar";
 import { createPostSchema, type CreatePostData } from "@/schemas/post.schema";
 import { UploadButton } from "@/components/ui/uploadthing";
+import Image from "next/image";
 
 const CreatePost = () => {
   const { user } = useUser();
   const [open, setOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const form = useForm<CreatePostData>({
     resolver: zodResolver(createPostSchema),
     defaultValues: {
       content: "",
-      files: [],
+      imageUrl: null,
       tags: [],
     },
   });
@@ -86,6 +88,14 @@ const CreatePost = () => {
     mutation.mutate(data);
   };
 
+  const handleDialogChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      form.reset();
+      setPreviewUrl(null);
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -93,7 +103,7 @@ const CreatePost = () => {
       <div className="flex flex-col gap-2 p-3">
         <div className="flex items-center gap-3">
           <LinkUserAvatar size="sm" userId={user.id} />
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <Dialog open={isOpen} onOpenChange={handleDialogChange}>
             <DialogTrigger asChild>
               <Button className="w-full" variant="secondary">
                 Create a Post
@@ -132,13 +142,35 @@ const CreatePost = () => {
 
                   <div className="grid w-full items-center gap-1.5">
                     <Label>Attachments</Label>
+                    {previewUrl && (
+                      <div className="relative w-full h-48 rounded-lg overflow-hidden mb-2">
+                        <Image
+                          src={previewUrl}
+                          alt="Upload preview"
+                          fill
+                          className="object-cover"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => {
+                            setPreviewUrl(null);
+                            form.setValue("imageUrl", null);
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    )}
                     <UploadButton
                       endpoint="postImage"
                       onClientUploadComplete={(res) => {
-                        if (res) {
-                          const urls = res.map((file) => file.url);
-                          form.setValue("files", [...(form.getValues("files") || []), ...urls]);
-                          toast.success("Files uploaded successfully");
+                        if (res?.[0]) {
+                          const url = res[0].url;
+                          setPreviewUrl(url);
+                          form.setValue("imageUrl", url);
+                          toast.success("File uploaded successfully");
                         }
                       }}
                       onUploadError={(error: Error) => {

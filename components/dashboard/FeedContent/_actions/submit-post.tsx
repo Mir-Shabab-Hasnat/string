@@ -1,38 +1,45 @@
-"use server"
+"use server";
 
-import prisma from "@/lib/prisma"
-import { currentUser } from "@clerk/nextjs/server"
-import { z } from "zod"
-import { createPostSchema } from "@/schemas/post.schema"
+import prisma from "@/lib/prisma";
+import { currentUser } from "@clerk/nextjs/server";
+import { z } from "zod";
+import { createPostSchema } from "@/schemas/post.schema";
 
 export async function submitPost(data: z.infer<typeof createPostSchema>) {
   try {
-    const parsedData = createPostSchema.parse(data)
-    const clerkUser = await currentUser()
-    
+    // Validate the incoming data
+    const parsedData = createPostSchema.parse(data);
+
+    // Get the current authenticated user
+    const clerkUser = await currentUser();
     if (!clerkUser) {
-      throw new Error("Unauthorized")
+      throw new Error("Unauthorized");
     }
 
+    // Create a new post in the database
     const post = await prisma.post.create({
       data: {
         content: parsedData.content,
-        imageUrl: parsedData.files?.[0],
+        imageUrl: parsedData.imageUrl || null,
         userId: clerkUser.id,
-        tags: parsedData.tags
+        tags: parsedData.tags,
       },
       include: {
-        user: true
-      }
-    })
+        user: true,
+      },
+    });
 
-    return post
+    return { success: true, post };
   } catch (error) {
+    console.error("Error submitting post:", error);
+
     if (error instanceof z.ZodError) {
-      throw new Error("Invalid data provided")
+      return { success: false, message: "Validation error", errors: error.flatten() };
     }
-    throw error
+
+    return { success: false, message: error instanceof Error ? error.message : "Unknown error" };
   }
 }
+
 
 
