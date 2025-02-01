@@ -9,5 +9,12 @@ export const userFormSchema = z.object({
   profilePicture: z.string().url().optional().or(z.literal("")),
 })
 
-export type UserFormData = z.infer<typeof userFormSchema> 
+export type UserFormData = z.infer<typeof userFormSchema>
+
+export const updateProfileSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  organisation: z.string().optional(),
+  profilePicture: z.string().optional(),
+}) 
 

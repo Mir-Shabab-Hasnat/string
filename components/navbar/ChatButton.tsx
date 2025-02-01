@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import ChatUI from "@/components/chat/ChatUI";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function ChatButton() {
   return (
@@ -27,7 +28,9 @@ export function ChatButton() {
         <SheetHeader className="p-4 border-b">
           <SheetTitle>Messages</SheetTitle>
         </SheetHeader>
-        <ChatUI />
+        <TooltipProvider>
+          <ChatUI />
+        </TooltipProvider>
       </SheetContent>
     </Sheet>
   );
