@@ -9,6 +9,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get pagination parameters
+    const searchParams = req.nextUrl.searchParams;
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '5');
+    const skip = (page - 1) * limit;
+
     // Get user's preferences
     const preferences = await prisma.userFeedPreferences.findUnique({
       where: { userId: user.id },
@@ -28,7 +34,7 @@ export async function GET(req: NextRequest) {
       friend.senderId === user.id ? friend.recipientId : friend.senderId
     );
 
-    // Get preferred posts first
+    // Get preferred posts first with pagination
     const preferredPosts = await prisma.post.findMany({
       where: {
         AND: [
@@ -58,11 +64,14 @@ export async function GET(req: NextRequest) {
           },
         },
       },
+      skip,
+      take: limit,
     });
 
-    // If showing other content, get remaining posts
-    let otherPosts = [];
-    if (preferences?.showOtherContent) {
+    // If showing other content and we don't have enough preferred posts
+    let otherPosts: typeof preferredPosts = [];
+    if (preferences?.showOtherContent && preferredPosts.length < limit) {
+      const remainingCount = limit - preferredPosts.length;
       otherPosts = await prisma.post.findMany({
         where: {
           AND: [
@@ -94,6 +103,7 @@ export async function GET(req: NextRequest) {
             },
           },
         },
+        take: remainingCount,
       });
     }
 
