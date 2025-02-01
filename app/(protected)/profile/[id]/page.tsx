@@ -9,9 +9,10 @@ export default async function ProfilePage({
 }: {
   params: { id: string }
 }) {
+  const {id} = await params
   const [profile, viewer] = await Promise.all([
     prisma.user.findUnique({
-      where: { id: params.id }
+      where: { id: id }
     }),
     currentUser()
   ])

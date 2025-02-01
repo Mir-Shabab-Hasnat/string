@@ -19,6 +19,11 @@ type Notification = {
   createdAt: string;
   read: boolean;
   relatedId: string | null;
+  friendRequestStatus?: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+};
+
+type FriendRequestStatus = {
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
 };
 
 export function NotificationBell() {
@@ -75,13 +80,15 @@ export function NotificationBell() {
 
       if (!response.ok) throw new Error('Failed to process friend request');
 
+      // Fetch fresh notifications instead of manually updating the state
+      await fetchNotifications();
+
       // Mark notification as read
       await fetch(`/api/notifications/${notificationId}/read`, {
         method: 'PATCH',
       });
 
       toast.success(`Friend request ${action}ed successfully!`);
-      fetchNotifications();
     } catch (error) {
       toast.error(`Failed to ${action} friend request`);
     }
@@ -121,7 +128,10 @@ export function NotificationBell() {
                       </p>
                     </div>
                   </div>
-                  {notification.type === 'FRIEND_REQUEST' && !notification.read && (
+                  
+                  {/* Only show buttons for pending friend requests */}
+                  {notification.type === 'FRIEND_REQUEST' && 
+                   notification.friendRequestStatus === 'PENDING' && (
                     <div className="mt-2 flex gap-2">
                       <Button
                         size="sm"
