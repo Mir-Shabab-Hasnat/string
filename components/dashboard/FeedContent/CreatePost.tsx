@@ -47,7 +47,7 @@ const CreatePost = () => {
     <Card className="h-[10%]">
       <div className="flex flex-col gap-2 p-3">
         <div className="flex items-center gap-3">
-          <LinkUserAvatar size="sm" />
+          <LinkUserAvatar size="sm" userId={user.id} />
           <Dialog>
             <DialogTrigger asChild>
               <Button className="w-full" variant="secondary">
@@ -58,7 +58,7 @@ const CreatePost = () => {
               <DialogHeader>
                 <DialogTitle>
                   <div className="flex items-center gap-3">
-                    <LinkUserAvatar />
+                    <LinkUserAvatar size="sm" userId={user.id} />
                     <div className="flex flex-col">
                       <span className="font-semibold">{user?.fullName}</span>
                     </div>
