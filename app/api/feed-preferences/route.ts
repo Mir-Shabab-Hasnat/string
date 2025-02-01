@@ -9,14 +9,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tags } = await req.json();
+    const { tags, showOtherContent } = await req.json();
 
     const preferences = await prisma.userFeedPreferences.upsert({
       where: { userId: user.id },
-      update: { tags },
+      update: { 
+        tags,
+        showOtherContent: showOtherContent || false
+      },
       create: {
         userId: user.id,
         tags,
+        showOtherContent: showOtherContent || false
       },
     });
 

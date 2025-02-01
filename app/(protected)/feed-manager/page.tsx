@@ -12,6 +12,10 @@ export default async function FeedManagerPage() {
 
   const preferences = await prisma.userFeedPreferences.findUnique({
     where: { userId: user.id },
+    select: {
+      tags: true,
+      showOtherContent: true,
+    },
   });
 
   return (

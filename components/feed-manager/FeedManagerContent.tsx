@@ -6,11 +6,15 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { tags } from "@/lib/constants/tags";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface FeedManagerContentProps {
   initialPreferences: {
     tags: string[];
+    showOtherContent: boolean;
   } | null;
 }
 
@@ -19,13 +23,19 @@ export default function FeedManagerContent({ initialPreferences }: FeedManagerCo
   const [selectedTags, setSelectedTags] = useState<string[]>(
     initialPreferences?.tags || []
   );
+  const [showOtherContent, setShowOtherContent] = useState(
+    initialPreferences?.showOtherContent || false
+  );
 
   const handleSubmit = async () => {
     try {
       const response = await fetch("/api/feed-preferences", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tags: selectedTags }),
+        body: JSON.stringify({ 
+          tags: selectedTags,
+          showOtherContent 
+        }),
       });
 
       if (!response.ok) throw new Error("Failed to save preferences");
@@ -38,13 +48,53 @@ export default function FeedManagerContent({ initialPreferences }: FeedManagerCo
     }
   };
 
+  const handleSelectAll = () => {
+    setSelectedTags([...tags]);
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedTags([]);
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Select Tags to Filter Your Feed</h2>
-        <p className="text-sm text-muted-foreground">
-          Choose the tags you're interested in to customize your feed content.
-        </p>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Feed Preferences</h2>
+          <div className="space-x-2">
+            <Button variant="outline" size="sm" onClick={handleSelectAll}>
+              Select All
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleDeselectAll}>
+              Deselect All
+            </Button>
+          </div>
+        </div>
+        
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <h3 className="font-medium">Show Other Content</h3>
+              <p className="text-sm text-muted-foreground">
+                Display posts outside your selected tags with lower priority
+              </p>
+            </div>
+            <Switch
+              checked={showOtherContent}
+              onCheckedChange={setShowOtherContent}
+            />
+          </div>
+        </Card>
+
+        <Separator />
+
+        <div className="space-y-2">
+          <h3 className="font-medium">Selected Tags</h3>
+          <p className="text-sm text-muted-foreground">
+            Choose the tags you're interested in to customize your feed content
+          </p>
+        </div>
+
         <ScrollArea className="h-[400px] rounded-md border p-4">
           <div className="space-y-4">
             {tags.map((tag) => (
@@ -68,7 +118,9 @@ export default function FeedManagerContent({ initialPreferences }: FeedManagerCo
           </div>
         </ScrollArea>
       </div>
-      <Button onClick={handleSubmit}>Save Preferences</Button>
+      <Button onClick={handleSubmit} className="w-full">
+        Save Preferences
+      </Button>
     </div>
   );
 } 

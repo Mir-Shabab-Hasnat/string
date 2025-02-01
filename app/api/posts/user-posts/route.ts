@@ -28,25 +28,22 @@ export async function GET(req: NextRequest) {
       friend.senderId === user.id ? friend.recipientId : friend.senderId
     );
 
-    // Build the where clause based on preferences
-    const where = {
-      AND: [
-        {
-          userId: {
-            in: [user.id, ...friendIds],
+    // Get preferred posts first
+    const preferredPosts = await prisma.post.findMany({
+      where: {
+        AND: [
+          {
+            userId: {
+              in: [user.id, ...friendIds],
+            },
           },
-        },
-        // Only apply tag filter if user has preferences
-        ...(preferences?.tags?.length ? [{
-          tags: {
-            hasSome: preferences.tags,
-          },
-        }] : []),
-      ],
-    };
-
-    const posts = await prisma.post.findMany({
-      where,
+          ...(preferences?.tags?.length ? [{
+            tags: {
+              hasSome: preferences.tags,
+            },
+          }] : []),
+        ],
+      },
       orderBy: {
         createdAt: 'desc'
       },
@@ -62,6 +59,46 @@ export async function GET(req: NextRequest) {
         },
       },
     });
+
+    // If showing other content, get remaining posts
+    let otherPosts = [];
+    if (preferences?.showOtherContent) {
+      otherPosts = await prisma.post.findMany({
+        where: {
+          AND: [
+            {
+              userId: {
+                in: [user.id, ...friendIds],
+              },
+            },
+            {
+              NOT: {
+                tags: {
+                  hasSome: preferences.tags || [],
+                },
+              },
+            },
+          ],
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              profilePicture: true,
+              username: true,
+            },
+          },
+        },
+      });
+    }
+
+    // Combine posts, with preferred posts first
+    const posts = [...preferredPosts, ...otherPosts];
 
     return NextResponse.json({ posts });
   } catch (error) {
