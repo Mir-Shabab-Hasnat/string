@@ -235,4 +235,5 @@ export default function ChatUI() {
       </div>
     </div>
   );
+  
 }
