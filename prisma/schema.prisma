@@ -28,7 +28,7 @@ model User {
   Post                                          Post[]
   feedPreferences                               UserFeedPreferences?
   conversations                                 Conversation[]       @relation("ConversationParticipants")
-  feedPreferences                               UserFeedPreferences?
+  
   marketplaceItems                              MarketplaceItem[]
   cart                                          Cart?
 }
