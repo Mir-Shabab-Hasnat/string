@@ -17,7 +17,7 @@ interface PostProps {
       lastName: string;
       profilePicture: string | null;
     };
-    tags: string[];
+    tags?: string[];
   };
 }
 
@@ -52,7 +52,7 @@ export default function Post({ post }: PostProps) {
             />
           </div>
         )}
-        {post.tags.length > 0 && (
+        {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {post.tags.map((tag) => (
               <span
