@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Edit, MessageSquare, MapPin, Calendar, Mail, BookOpen, Microscope, GraduationCap, Users } from "lucide-react";
+import { Edit, MessageSquare, MapPin, Calendar, Mail, BookOpen, Microscope, GraduationCap, Users, UserPlus, UserCheck, UserX } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,10 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/Badge"
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { FriendRequestButton } from "./FriendRequestButton";
 
 interface ProfileHeaderProps {
   user: User;
@@ -44,6 +48,12 @@ const mockConnections = [
   },
   // Add more mock users as needed
 ]
+
+type FriendStatus = {
+  status: 'NONE' | 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  requestId: string | null;
+  isOutgoing: boolean;
+};
 
 export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
   const roleColors = {
@@ -141,6 +151,7 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
                             {connection.role.toLowerCase()}
                           </Badge>
                         </Link>
+                        
                       ))}
                     </div>
                   </ScrollArea>
@@ -219,13 +230,7 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
                 </>
               ) : (
                 <>
-                  <Button 
-                    size="lg" 
-                    className="w-full flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Users className="w-4 h-4" />
-                    Follow
-                  </Button>
+                  <FriendRequestButton userId={user.id} />
                   <Button 
                     size="lg" 
                     variant="outline"
