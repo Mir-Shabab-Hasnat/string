@@ -262,7 +262,7 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
               <h1 className="text-3xl font-bold text-foreground">
                 {user.firstName} {user.lastName}
               </h1>
-              <p className="text-lg text-muted-foreground font-medium">@{user.username}</p>
+              
             </div>
 
             {/* Role and Organization */}

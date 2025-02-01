@@ -7,6 +7,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const {id} = await params
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -14,7 +15,7 @@ export async function GET(
 
     const messages = await prisma.message.findMany({
       where: {
-        conversationId: params.id,
+        conversationId: id,
       },
       include: {
         sender: {

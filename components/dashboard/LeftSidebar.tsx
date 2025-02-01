@@ -7,7 +7,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "../ui/button"
 import { ChatButton } from "../navbar/ChatButton"
-
+import React from "react"
 
 interface NavItem {
   label: string
@@ -15,9 +15,32 @@ interface NavItem {
   icon: React.ReactNode
 }
 
+interface UserProfile {
+  profilePicture: string;
+  firstName: string;
+  lastName: string;
+}
+
 export default function LeftSidebar() {
   const { user } = useUser()
   const pathname = usePathname()
+
+  // Fetch user profile from the API
+  const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
+
+  React.useEffect(() => {
+    async function fetchUserProfile() {
+      try {
+        const response = await fetch('/api/get-user-profile');
+        const data = await response.json();
+        setUserProfile(data);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    }
+
+    fetchUserProfile();
+  }, []);
 
   const navItems: NavItem[] = [
     {
@@ -41,16 +64,15 @@ export default function LeftSidebar() {
       <div className="flex flex-col items-center space-y-4 pb-6 border-b">
         <div className="w-20 h-20 rounded-full overflow-hidden">
           <img
-            src={user?.imageUrl || '/default-avatar.png'}
+            src={userProfile?.profilePicture || '/default-avatar.png'}
             alt="Profile"
             className="w-full h-full object-cover"
           />
         </div>
         <div className="text-center">
           <h2 className="font-semibold text-lg">
-            {user?.firstName} {user?.lastName}
+            {userProfile?.firstName} {userProfile?.lastName}
           </h2>
-          <p className="text-sm text-muted-foreground">@{user?.username}</p>
         </div>
       </div>
 
@@ -76,3 +98,4 @@ export default function LeftSidebar() {
     </Card>
   )
 }
+
