@@ -178,8 +178,8 @@ export default function ChatUI() {
                     <div
                       className={`rounded-lg p-3 max-w-[60%] ${
                         message.senderId === user.id
-                          ? "bg-primary text-primary-foreground ml-12"
-                          : "bg-accent mr-12"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-accent"
                       }`}
                     >
                       <p className="break-words whitespace-pre-wrap text-sm">
@@ -189,6 +189,15 @@ export default function ChatUI() {
                         {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
                       </p>
                     </div>
+                    {message.senderId === user.id && (
+                      <Avatar className="h-8 w-8 shrink-0">
+                        <AvatarImage src={message.sender.profilePicture || undefined} />
+                        <AvatarFallback>
+                          {message.sender.firstName?.[0]}
+                          {message.sender.lastName?.[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
                   </div>
                 ))}
               </div>
@@ -199,15 +208,20 @@ export default function ChatUI() {
                   e.preventDefault();
                   sendMessage();
                 }}
-                className="flex gap-2 max-w-6xl mx-auto"
+                className="flex gap-3 max-w-6xl mx-auto items-center"
               >
                 <Input
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-1"
+                  className="flex-1 rounded-full"
                 />
-                <Button type="submit" size="icon" disabled={!messageInput.trim()}>
+                <Button 
+                  type="submit" 
+                  size="icon" 
+                  disabled={!messageInput.trim()}
+                  className="rounded-full h-10 w-10 shrink-0"
+                >
                   <Send className="h-4 w-4" />
                 </Button>
               </form>
