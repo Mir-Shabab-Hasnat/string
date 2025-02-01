@@ -104,9 +104,9 @@ export default async function PortfolioPage({
   const RoleIcon = config.icon
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="flex flex-col md:flex-row items-center gap-8">
             {/* Profile Image */}
@@ -152,7 +152,7 @@ export default async function PortfolioPage({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Code className="w-5 h-5 text-blue-500" />
+                  <Code className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                   Skills & Technologies
                 </CardTitle>
               </CardHeader>
@@ -160,7 +160,7 @@ export default async function PortfolioPage({
                 <div className="space-y-6">
                   {config.sections[1].items.map((item, index) => (
                     <div key={index}>
-                      <h3 className="font-medium text-gray-700 mb-2">{item.category}</h3>
+                      <h3 className="font-medium text-foreground mb-2">{item.category}</h3>
                       <div className="flex flex-wrap gap-2">
                         {item.skills.map((skill, i) => (
                           <Badge key={i} variant="secondary">
@@ -178,16 +178,16 @@ export default async function PortfolioPage({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Education className="w-5 h-5 text-blue-500" />
+                  <Education className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                   Education
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {config.sections[3].items.map((item, index) => (
                   <div key={index} className="space-y-2">
-                    <h3 className="font-semibold text-lg">{item.school}</h3>
-                    <p className="text-gray-600">{item.degree}</p>
-                    <div className="flex justify-between text-sm text-gray-500">
+                    <h3 className="font-semibold text-lg text-foreground">{item.school}</h3>
+                    <p className="text-muted-foreground">{item.degree}</p>
+                    <div className="flex justify-between text-sm text-muted-foreground">
                       <span>{item.date}</span>
                       <span>GPA: {item.gpa}</span>
                     </div>
@@ -203,22 +203,22 @@ export default async function PortfolioPage({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Rocket className="w-5 h-5 text-blue-500" />
+                  <Rocket className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                   Academic Projects
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {config.sections[0].items.map((item, index) => (
                   <div key={index} className="border-b last:border-0 pb-4 last:pb-0 mb-4 last:mb-0">
-                    <h3 className="font-semibold text-lg">{item.title}</h3>
-                    <p className="text-gray-600 mt-1">{item.description}</p>
+                    <h3 className="font-semibold text-lg text-foreground">{item.title}</h3>
+                    <p className="text-muted-foreground mt-1">{item.description}</p>
                     <div className="flex justify-between items-center mt-2">
                       <div className="flex gap-2">
                         {item.tags.map((tag, i) => (
                           <Badge key={i} variant="outline">{tag}</Badge>
                         ))}
                       </div>
-                      <span className="text-sm text-gray-500">{item.date}</span>
+                      <span className="text-sm text-muted-foreground">{item.date}</span>
                     </div>
                   </div>
                 ))}
@@ -229,16 +229,16 @@ export default async function PortfolioPage({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-blue-500" />
+                  <Trophy className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                   Achievements
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {config.sections[2].items.map((item, index) => (
                   <div key={index} className="border-b last:border-0 pb-4 last:pb-0 mb-4 last:mb-0">
-                    <h3 className="font-semibold">{item.title}</h3>
-                    <p className="text-gray-600 mt-1">{item.description}</p>
-                    <span className="text-sm text-gray-500 block mt-2">{item.date}</span>
+                    <h3 className="font-semibold text-foreground">{item.title}</h3>
+                    <p className="text-muted-foreground mt-1">{item.description}</p>
+                    <span className="text-sm text-muted-foreground block mt-2">{item.date}</span>
                   </div>
                 ))}
               </CardContent>
