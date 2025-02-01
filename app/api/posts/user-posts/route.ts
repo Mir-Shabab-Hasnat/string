@@ -9,6 +9,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get user's preferences
+    const preferences = await prisma.userFeedPreferences.findUnique({
+      where: { userId: user.id },
+    });
+
     // Get user's friends IDs
     const friends = await prisma.friendRequest.findMany({
       where: {
@@ -19,18 +24,29 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Extract friend IDs
     const friendIds = friends.map(friend => 
       friend.senderId === user.id ? friend.recipientId : friend.senderId
     );
 
-    // Get posts from user and friends
-    const posts = await prisma.post.findMany({
-      where: {
-        userId: {
-          in: [user.id, ...friendIds],
+    // Build the where clause based on preferences
+    const where = {
+      AND: [
+        {
+          userId: {
+            in: [user.id, ...friendIds],
+          },
         },
-      },
+        // Only apply tag filter if user has preferences
+        ...(preferences?.tags?.length ? [{
+          tags: {
+            hasSome: preferences.tags,
+          },
+        }] : []),
+      ],
+    };
+
+    const posts = await prisma.post.findMany({
+      where,
       orderBy: {
         createdAt: 'desc'
       },

@@ -7,6 +7,7 @@ import Logo from "./Logo"
 import CustomUserButton from "./CustomUserButton"
 import { NotificationBell } from "./navbar/NotificationBell"
 import { ChatButton } from "./navbar/ChatButton"
+import { FeedManagerButton } from "./navbar/FeedManagerButton"
 
 export default function Navbar() {
   return (
@@ -29,6 +30,7 @@ export default function Navbar() {
             <ThemeToggle />
             <NotificationBell />
             <ChatButton />
+            <FeedManagerButton />
             <CustomUserButton />
           </div>
         </div>
