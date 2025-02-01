@@ -13,7 +13,7 @@ interface ProfileTabsProps {
 
 export default function ProfileTabs({ user, isOwner }: ProfileTabsProps) {
   return (
-    <Card className="w-full max-w-3xl mx-auto mt-6 shadow-md border rounded-xl">
+    <Card className="w-full max-w-3xl mx-auto mt-6 bg-background border rounded-xl">
       <CardContent className="p-6">
         <Tabs defaultValue="about" className="w-full">
           <TabsList className="flex justify-center mb-6">
@@ -26,7 +26,7 @@ export default function ProfileTabs({ user, isOwner }: ProfileTabsProps) {
             <div className="space-y-6">
               {/* Basic Information */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+                <h3 className="text-lg font-semibold mb-4 text-foreground">Basic Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-3">
                     <UserIcon className="h-5 w-5 text-primary" />
@@ -74,15 +74,15 @@ export default function ProfileTabs({ user, isOwner }: ProfileTabsProps) {
 
               {/* Account Status */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Account Status</h3>
+                <h3 className="text-lg font-semibold mb-4 text-foreground">Account Status</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Role</p>
-                    <p className="font-medium capitalize">{user.role.toLowerCase()}</p>
+                    <p className="font-medium text-foreground capitalize">{user.role.toLowerCase()}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Status</p>
-                    <p className="font-medium">Active</p>
+                    <p className="font-medium text-foreground">Active</p>
                   </div>
                 </div>
               </div>

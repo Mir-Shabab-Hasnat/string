@@ -72,7 +72,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
   };
 
   return (
-    <Card>
+    <Card className="bg-background">
       <CardHeader>
         <CardTitle>Edit Profile</CardTitle>
       </CardHeader>
@@ -84,7 +84,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
               <FormLabel>Profile Picture</FormLabel>
               <div className="flex items-center gap-4">
                 {imageUrl && (
-                  <div className="relative w-24 h-24 rounded-full overflow-hidden">
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden border border-border">
                     <Image
                       src={imageUrl}
                       alt="Profile picture"

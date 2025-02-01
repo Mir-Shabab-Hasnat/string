@@ -20,17 +20,16 @@ model User {
   profilePicture                                String?
   createdAt                                     DateTime             @default(now())
   updatedAt                                     DateTime             @updatedAt
+  cart                                          Cart?
   Comment                                       Comment[]
   FriendRequest_FriendRequest_recipientIdToUser FriendRequest[]      @relation("FriendRequest_recipientIdToUser")
   FriendRequest_FriendRequest_senderIdToUser    FriendRequest[]      @relation("FriendRequest_senderIdToUser")
+  marketplaceItems                              MarketplaceItem[]
   messages                                      Message[]            @relation("Messages")
   Notification                                  Notification[]
   Post                                          Post[]
   feedPreferences                               UserFeedPreferences?
   conversations                                 Conversation[]       @relation("ConversationParticipants")
-  
-  marketplaceItems                              MarketplaceItem[]
-  cart                                          Cart?
 }
 
 model Conversation {
@@ -114,9 +113,9 @@ model UserFeedPreferences {
   id               String   @id @default(uuid())
   userId           String   @unique
   tags             String[]
-  showOtherContent Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  showOtherContent Boolean  @default(false)
   user             User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
@@ -132,12 +131,12 @@ model MarketplaceItem {
   location    String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  seller      User         @relation(fields: [sellerId], references: [id])
   sellerId    String
   sold        Boolean      @default(false)
+  clickCount  Int          @default(0)
+  views       Int          @default(0)
   CartItem    CartItem[]
-  views       Int            @default(0)
-  clickCount  Int            @default(0)
+  seller      User         @relation(fields: [sellerId], references: [id])
 
   @@index([sellerId])
 }
@@ -145,20 +144,20 @@ model MarketplaceItem {
 model Cart {
   id        String     @id @default(uuid())
   userId    String     @unique
-  user      User       @relation(fields: [userId], references: [id])
-  items     CartItem[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
 }
 
 model CartItem {
   id              String          @id @default(uuid())
   cartId          String
-  cart            Cart            @relation(fields: [cartId], references: [id])
-  marketplaceItem MarketplaceItem @relation(fields: [itemId], references: [id])
   itemId          String
   quantity        Int             @default(1)
   createdAt       DateTime        @default(now())
+  cart            Cart            @relation(fields: [cartId], references: [id])
+  marketplaceItem MarketplaceItem @relation(fields: [itemId], references: [id])
 
   @@unique([cartId, itemId])
 }
