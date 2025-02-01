@@ -7,9 +7,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
+import { Store } from "lucide-react"
 
 export default function CustomUserButton() {
   const { user } = useUser()
@@ -41,6 +43,11 @@ export default function CustomUserButton() {
         <DropdownMenuItem onClick={() => router.push(`/profile/${user.id}`)}>
           Profile
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push('/marketplace')}>
+          <Store className="mr-2 h-4 w-4" />
+          Marketplace
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>
           Log out
         </DropdownMenuItem>

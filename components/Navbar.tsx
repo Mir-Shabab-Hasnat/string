@@ -7,6 +7,8 @@ import Logo from "./Logo"
 import CustomUserButton from "./CustomUserButton"
 import { NotificationBell } from "./navbar/NotificationBell"
 import { ChatButton } from "./navbar/ChatButton"
+import { Store } from "lucide-react"
+import { Button } from "./ui/button"
 
 export default function Navbar() {
   return (
@@ -28,6 +30,11 @@ export default function Navbar() {
             </div>
             <ThemeToggle />
             <NotificationBell />
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/marketplace">
+                <Store className="h-5 w-5" />
+              </Link>
+            </Button>
             <ChatButton />
             <CustomUserButton />
           </div>
