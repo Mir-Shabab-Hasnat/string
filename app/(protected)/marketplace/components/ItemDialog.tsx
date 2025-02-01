@@ -38,28 +38,7 @@ export function ItemDialog({ item, open, onOpenChange, onAddToCart }: ItemDialog
   
   if (!item) return null;
 
-  const handleContactSeller = async () => {
-    try {
-      // Create or get conversation with the seller
-      const response = await fetch('/api/conversations/ensure-with-user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: item.seller.id }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create conversation');
-      }
-
-      // Close the dialog and navigate to chat
-      onOpenChange(false);
-      router.push('/chat');
-    } catch (error) {
-      console.error('Error starting conversation:', error);
-    }
-  };
+  
 
   const handleAddToCart = () => {
     if (onAddToCart) {
@@ -130,10 +109,7 @@ export function ItemDialog({ item, open, onOpenChange, onAddToCart }: ItemDialog
               <ShoppingCart className="h-4 w-4 mr-2" />
               Add to Cart
             </Button>
-            <Button variant="outline" className="flex-1" onClick={handleContactSeller}>
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Contact Seller
-            </Button>
+            
           </div>
         </div>
       </DialogContent>
