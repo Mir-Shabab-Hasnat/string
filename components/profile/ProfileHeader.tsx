@@ -20,7 +20,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { FriendRequestButton } from "./FriendRequestButton";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface ProfileHeaderProps {
   user: User;
@@ -55,6 +55,14 @@ type FriendStatus = {
   requestId: string | null;
   isOutgoing: boolean;
 };
+
+interface Friend {
+  id: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  profilePicture: string | null;
+}
 
 export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
   const roleColors = {
@@ -98,6 +106,36 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
     year: 'numeric'
   });
 
+  const queryClient = useQueryClient();
+
+  const { data: friends, isLoading: friendsLoading } = useQuery({
+    queryKey: ["friends", user.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/user/${user.id}/friends`);
+      if (!res.ok) throw new Error("Failed to fetch friends");
+      return res.json();
+    },
+  });
+
+  const { mutate: removeFriend } = useMutation({
+    mutationFn: async (friendId: string) => {
+      const res = await fetch(`/api/user/${user.id}/friends/remove`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ friendId }),
+      });
+      if (!res.ok) throw new Error("Failed to remove friend");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friends", user.id] });
+      toast.success("Friend removed successfully");
+    },
+    onError: () => {
+      toast.error("Failed to remove friend");
+    },
+  });
+
   return (
     <div className="relative">
       <div className="bg-white rounded-xl shadow-lg p-8 backdrop-blur-sm">
@@ -120,13 +158,6 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
               
               {/* Status Indicator - Optional */}
               <div className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 rounded-full ring-4 ring-white" />
-            </div>
-
-            {/* Followers/Following Stats */}
-            <div className="flex gap-4 text-sm font-medium">
-              <span className="text-sm font-medium text-gray-600">
-                {isLoading ? "Loading..." : error ? "Error" : `${friendCount} Friends`}
-              </span>
             </div>
 
             {/* Quick Action Buttons */}
@@ -177,6 +208,50 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
                   </Link>
                 </>
               )}
+              {/* Friends Dialog */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="lg" className="w-full">
+                    Friends ({friendCount || 0})
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md max-h-[85vh] p-6">
+                  <DialogHeader className="mb-4">
+                    <DialogTitle>Friends</DialogTitle>
+                  </DialogHeader>
+                  <ScrollArea className="flex-1 h-[50vh] pr-4">
+                    {friendsLoading ? (
+                      <div className="p-4 text-center text-gray-500">Loading...</div>
+                    ) : (
+                      <div className="space-y-2">
+                        {friends?.map((friend: Friend) => (
+                          <div key={friend.id} className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <Avatar>
+                              <AvatarImage src={friend.profilePicture || "/default-avatar.png"} />
+                              <AvatarFallback>
+                                {friend.firstName[0]}
+                                {friend.lastName[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <p className="font-medium">
+                                {friend.firstName} {friend.lastName}
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => removeFriend(friend.id)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
