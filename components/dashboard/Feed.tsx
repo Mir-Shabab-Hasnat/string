@@ -10,7 +10,7 @@ export default function Feed() {
   
 
   return (
-    <Card className="h-[calc(100vh-7rem)] overflow-y-auto p-4 space-y-4">
+    <Card className="h-[calc(100vh-7rem)] overflow-y-auto p-4 space-y-4 scroll-container">
       <CreatePost />
       <PostFeed />
       

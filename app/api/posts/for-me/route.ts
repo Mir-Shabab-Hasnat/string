@@ -47,22 +47,34 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const cursor = searchParams.get("cursor");
-    const pageSize = 10;
+    const limit = Number(searchParams.get("limit")) || 2; // Default to 2 if not specified
 
     const posts = await prisma.post.findMany({
       where: {
-        userId: user.id
+        OR: [
+          { userId: user.id },
+          {
+            userId: {
+              in: await prisma.follow.findMany({
+                where: { followerId: user.id },
+                select: { followingId: true },
+              }).then(follows => follows.map(f => f.followingId))
+            }
+          }
+        ]
       },
-      include: getPostDataInclude(),
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}), // Skip the cursor item
       orderBy: { createdAt: "desc" },
-      take: pageSize + 1,
-      cursor: cursor ? { id: cursor } : undefined,
+      include: getPostDataInclude(),
     });
 
-    const nextCursor = posts.length > pageSize ? posts[pageSize].id : null;
+    const hasMore = posts.length > limit;
+    const slicedPosts = hasMore ? posts.slice(0, -1) : posts;
+    const nextCursor = hasMore ? posts[posts.length - 2].id : null;
 
     return NextResponse.json({
-      posts: posts.slice(0, pageSize),
+      posts: slicedPosts,
       nextCursor,
     });
   } catch (error) {

@@ -19,15 +19,21 @@ interface PostsResponse {
   nextCursor: string | null;
 }
 
+const POSTS_PER_PAGE = 2; // Changed to show 2 posts at a time
+
 export default function PostFeed() {
   const [posts, setPosts] = useState<PostWithUser[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   
-  // Create a ref that detects when element is visible
   const { ref, inView } = useInView({
-    threshold: 0,
+    threshold: 0.1,
+    delay: 100,
+    // Add root margin to trigger earlier
+    rootMargin: '50px 0px',
+    // This is crucial - observe within the scrollable container
+    root: document.querySelector('.scroll-container'),
   });
 
   const fetchPosts = async () => {
@@ -35,11 +41,13 @@ export default function PostFeed() {
     
     setIsLoading(true);
     try {
-      const url = cursor 
-        ? `/api/posts/for-me?cursor=${cursor}`
-        : '/api/posts/for-me';
-        
-      const response = await fetch(url);
+      const url = new URL('/api/posts/for-me', window.location.origin);
+      if (cursor) {
+        url.searchParams.set('cursor', cursor);
+      }
+      url.searchParams.set('limit', POSTS_PER_PAGE.toString());
+      
+      const response = await fetch(url.toString());
       if (!response.ok) {
         throw new Error('Failed to fetch posts');
       }
@@ -48,7 +56,7 @@ export default function PostFeed() {
       
       setPosts(prevPosts => [...prevPosts, ...data.posts]);
       setCursor(data.nextCursor);
-      setHasMore(!!data.nextCursor);
+      setHasMore(data.nextCursor !== null);
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
@@ -56,51 +64,46 @@ export default function PostFeed() {
     }
   };
 
-  // Fetch initial posts
+  // Initial fetch
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Fetch more posts when the loading element comes into view
+  // Fetch more when scrolling
   useEffect(() => {
     if (inView) {
       fetchPosts();
     }
-  }, [inView]);
+  }, [inView]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Posts grid/list */}
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <PostComponent
-            key={post.id}
-            post={{
-              id: post.id,
-              content: post.content,
-              imageUrl: post.imageUrl,
-              createdAt: post.createdAt.toString(),
-              user: {
-                id: post.user.id,
-                firstName: post.user.firstName,
-                lastName: post.user.lastName,
-                profilePicture: post.user.profilePicture,
-              },
-              tags: post.tags,
-            }}
-          />
-        ))}
-      </div>
+    <div className="space-y-4">
+      {posts.map((post) => (
+        <PostComponent
+          key={post.id}
+          post={{
+            id: post.id,
+            content: post.content,
+            imageUrl: post.imageUrl,
+            createdAt: post.createdAt.toString(),
+            user: {
+              id: post.user.id,
+              firstName: post.user.firstName,
+              lastName: post.user.lastName,
+              profilePicture: post.user.profilePicture,
+            },
+            tags: post.tags,
+          }}
+        />
+      ))}
 
-      {/* Loading indicator */}
+      {/* Loading trigger */}
       <div 
-        ref={ref} 
-        className="py-4 text-center"
+        ref={ref}
+        className="h-16 flex items-center justify-center"
       >
         {isLoading && (
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          </div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
         )}
         {!hasMore && posts.length > 0 && (
           <p className="text-gray-500">No more posts to load</p>
