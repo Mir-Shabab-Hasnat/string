@@ -24,6 +24,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/Badge"
 import Image from "next/image"
 
+export const dynamic = "force-dynamic";
+
 export default async function PortfolioPage({
   params
 }: {
