@@ -20,6 +20,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { FriendRequestButton } from "./FriendRequestButton";
+import { useQuery } from "@tanstack/react-query";
 
 interface ProfileHeaderProps {
   user: User;
@@ -82,6 +83,16 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
 
   const RoleIcon = roleConfig[user.role].icon;
 
+  const { data: friendCount, isLoading, error } = useQuery({
+    queryKey: ["friendCount", user.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/user/${user.id}/friends/count`);
+      if (!res.ok) throw new Error("Failed to fetch friend count");
+      const data = await res.json();
+      return data.count;
+    },
+  });
+
   const joinDate = new Date(user.createdAt).toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric'
@@ -113,94 +124,9 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
 
             {/* Followers/Following Stats */}
             <div className="flex gap-4 text-sm font-medium">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="flex flex-col items-center hover:text-blue-600 transition-colors">
-                    <span className="text-2xl font-bold">2.5K</span>
-                    <span className="text-gray-600">Followers</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Followers</DialogTitle>
-                  </DialogHeader>
-                  <ScrollArea className="max-h-[60vh] mt-4">
-                    <div className="space-y-4">
-                      {mockConnections.map((connection) => (
-                        <Link 
-                          key={connection.id} 
-                          href={`/profile/${connection.id}`}
-                          className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                          <Avatar>
-                            <AvatarImage src={connection.profilePicture} />
-                            <AvatarFallback>
-                              {connection.firstName[0]}
-                              {connection.lastName[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <p className="font-medium">
-                              {connection.firstName} {connection.lastName}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              @{connection.username}
-                            </p>
-                          </div>
-                          <Badge variant="outline">
-                            {connection.role.toLowerCase()}
-                          </Badge>
-                        </Link>
-                        
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </DialogContent>
-              </Dialog>
-
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="flex flex-col items-center hover:text-blue-600 transition-colors">
-                    <span className="text-2xl font-bold">1.2K</span>
-                    <span className="text-gray-600">Following</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Following</DialogTitle>
-                  </DialogHeader>
-                  <ScrollArea className="max-h-[60vh] mt-4">
-                    <div className="space-y-4">
-                      {mockConnections.map((connection) => (
-                        <Link 
-                          key={connection.id} 
-                          href={`/profile/${connection.id}`}
-                          className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                          <Avatar>
-                            <AvatarImage src={connection.profilePicture} />
-                            <AvatarFallback>
-                              {connection.firstName[0]}
-                              {connection.lastName[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <p className="font-medium">
-                              {connection.firstName} {connection.lastName}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              @{connection.username}
-                            </p>
-                          </div>
-                          <Badge variant="outline">
-                            {connection.role.toLowerCase()}
-                          </Badge>
-                        </Link>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </DialogContent>
-              </Dialog>
+              <span className="text-sm font-medium text-gray-600">
+                {isLoading ? "Loading..." : error ? "Error" : `${friendCount} Friends`}
+              </span>
             </div>
 
             {/* Quick Action Buttons */}
