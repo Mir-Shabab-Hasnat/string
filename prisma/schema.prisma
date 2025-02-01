@@ -28,6 +28,8 @@ model User {
   Post                                          Post[]
   conversations                                 Conversation[]       @relation("ConversationParticipants")
   feedPreferences                               UserFeedPreferences?
+  marketplaceItems                              MarketplaceItem[]
+  cart                                          Cart?
 }
 
 model Conversation {
@@ -108,19 +110,68 @@ model Notification {
 }
 
 model UserFeedPreferences {
-  id                String   @id @default(uuid())
-  userId            String   @unique
-  tags              String[]
-  showOtherContent  Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id])
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  tags             String[]
+  showOtherContent Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
+}
+
+model MarketplaceItem {
+  id          String       @id @default(uuid())
+  title       String
+  description String
+  price       Float
+  category    ItemCategory
+  condition   String?
+  location    String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  seller      User         @relation(fields: [sellerId], references: [id])
+  sellerId    String
+  sold        Boolean      @default(false)
+  CartItem    CartItem[]
+  views       Int            @default(0)
+  clickCount  Int            @default(0)
+
+  @@index([sellerId])
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id              String          @id @default(uuid())
+  cartId          String
+  cart            Cart            @relation(fields: [cartId], references: [id])
+  marketplaceItem MarketplaceItem @relation(fields: [itemId], references: [id])
+  itemId          String
+  quantity        Int             @default(1)
+  createdAt       DateTime        @default(now())
+
+  @@unique([cartId, itemId])
 }
 
 enum UserRole {
   STUDENT
   PROFESSIONAL
   ACADEMIC
+}
+
+enum ItemCategory {
+  TICKETS
+  BOOKS
+  MAGAZINES
+  MERCHANDISE
+  OTHER
 }
