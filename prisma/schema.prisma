@@ -66,6 +66,7 @@ model Post {
   userId    String // Foreign key reference to User
   likes     Int       @default(0) // Number of likes
   comments  Comment[] // One-to-many relationship with comments
+  tags      String[]  @default([])
 }
 
 model Comment {

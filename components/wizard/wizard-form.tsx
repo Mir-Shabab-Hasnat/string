@@ -25,7 +25,10 @@ export function WizardForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          profilePicture: data.profilePicture || null,
+        }),
       })
       
       if (!response.ok) {
@@ -49,6 +52,8 @@ export function WizardForm() {
     defaultValues: {
       firstName: "",
       lastName: "",
+      birthDate: undefined,
+      role: undefined,
       organisation: "",
       profilePicture: "",
     },
@@ -60,7 +65,7 @@ export function WizardForm() {
 
   const nextStep = () => {
     const fields = step === 1 
-      ? ["firstName", "lastName", "birthDate"] as const
+      ? ["firstName", "lastName", "birthDate", "profilePicture"] as const
       : step === 2 
       ? ["role"] as const
       : ["organisation"] as const
