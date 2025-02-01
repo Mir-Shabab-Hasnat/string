@@ -31,11 +31,8 @@ model User {
   feedPreferences                               UserFeedPreferences?
   conversations                                 Conversation[]       @relation("ConversationParticipants")
 
-
-  marketplaceItems MarketplaceItem[]
-  cart             Cart?
+  
   PostAuthenticity PostAuthenticity[]
-
 }
 
 model Conversation {
@@ -158,11 +155,8 @@ model MarketplaceItem {
   views       Int          @default(0)
   CartItem    CartItem[]
 
-  views       Int          @default(0)
-  clickCount  Int          @default(0)
-
-  seller      User         @relation(fields: [sellerId], references: [id])
-
+  
+  seller User @relation(fields: [sellerId], references: [id])
 
   @@index([sellerId])
 }

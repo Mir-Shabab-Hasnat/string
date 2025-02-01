@@ -6,6 +6,8 @@ import { MessageSquare, Settings, Store, TagsIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "../ui/button"
+import { ChatButton } from "../navbar/ChatButton"
+
 
 interface NavItem {
   label: string
@@ -23,17 +25,14 @@ export default function LeftSidebar() {
       href: "/feed-manager",
       icon: <TagsIcon className="w-4 h-4" />
     },
-    {
-      label: "Chat",
-      href: "/chat",
-      icon: <MessageSquare className="w-4 h-4" />
-    },
+    
     {
       label: "Marketplace",
       href: "/marketplace",
       icon: <Store className="w-4 h-4" />
     },
     
+   
   ]
 
   return (
@@ -71,6 +70,8 @@ export default function LeftSidebar() {
             </Link>
           )
         })}
+        {/* Chat Button */}
+        
       </nav>
     </Card>
   )
