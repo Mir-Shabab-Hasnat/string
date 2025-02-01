@@ -7,6 +7,7 @@ import Logo from "./Logo"
 import CustomUserButton from "./CustomUserButton"
 import { NotificationBell } from "./navbar/NotificationBell"
 import { ChatButton } from "./navbar/ChatButton"
+import { FeedManagerButton } from "./navbar/FeedManagerButton"
 import { Store } from "lucide-react"
 import { Button } from "./ui/button"
 
@@ -34,6 +35,7 @@ export default function Navbar() {
             <ThemeToggle />
             <NotificationBell />
             <ChatButton />
+            <FeedManagerButton />
             <CustomUserButton />
           </div>
         </div>
