@@ -30,6 +30,8 @@ model User {
   updatedAt      DateTime       @updatedAt
   Post           Post[]
   Comment        Comment[]
+  followers      Follow[]       @relation("followers")
+  following     Follow[]       @relation("following")
 }
 
 enum UserRole {
@@ -77,4 +79,18 @@ model Comment {
   postId    String
   user      User     @relation(fields: [userId], references: [id])
   userId    String
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  follower    User     @relation("following", fields: [followerId], references: [id])
+  followerId  String
+  following   User     @relation("followers", fields: [followingId], references: [id])
+  followingId String
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("follows")
 }

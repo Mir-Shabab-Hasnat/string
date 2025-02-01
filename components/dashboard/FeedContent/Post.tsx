@@ -68,3 +68,4 @@ export default function Post({ post }: PostProps) {
     </Card>
   );
 } 
+

@@ -4,7 +4,6 @@ import { useInfiniteQuery } from "@tanstack/react-query"
 import { Card } from "@/components/ui/card"
 import CreatePost from "./FeedContent/CreatePost"
 import { Loader2 } from "lucide-react"
-
 import { useEffect } from "react"
 import { useInView } from "react-intersection-observer"
 import Post from "./FeedContent/Post"
@@ -33,8 +32,9 @@ interface PostData {
 }
 
 export default function Feed() {
-  // Create ref for infinite scroll
-  const { ref, inView } = useInView()
+  const { ref, inView } = useInView({
+    threshold: 0.5,
+  })
 
   const {
     data,
@@ -43,28 +43,18 @@ export default function Feed() {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ["posts"],
-    queryFn: async ({ pageParam }: { pageParam: string | null }) => {
-      const response = await fetch(
-        `/api/posts?cursor=${pageParam || ""}`,
-        {
-          method: "GET",
-        }
-      )
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch posts")
-      }
-      
-      return response.json() as Promise<PostsPage>
-    },
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    queryKey: ["posts-for-me"],
+    queryFn: ({ pageParam }) =>
+      fetch(
+        `/api/posts/for-me${pageParam ? `?cursor=${pageParam}` : ""}`,
+      ).then(res => {
+        if (!res.ok) throw new Error("Failed to fetch posts")
+        return res.json() as Promise<PostsPage>
+      }),
     initialPageParam: null as string | null,
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
-    gcTime: 1000 * 60 * 60, // Keep unused data in cache for 1 hour
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
   })
 
-  // Load more posts when user scrolls to bottom
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage()
@@ -73,41 +63,31 @@ export default function Feed() {
 
   const posts = data?.pages.flatMap((page) => page.posts) || []
 
-  if (status === "pending") {
-    return (
-      <Card className="h-[calc(100vh-7rem)] overflow-y-auto p-4">
-        <CreatePost />
-        <div className="flex justify-center p-4">
-          <Loader2 className="h-6 w-6 animate-spin" />
-        </div>
-      </Card>
-    )
-  }
+  // if (status === "pending") {
+  //   return (
+  //     <Card className="h-[calc(100vh-7rem)] p-4">
+  //       <div className="flex justify-center">
+  //         <Loader2 className="h-6 w-6 animate-spin" />
+  //       </div>
+  //     </Card>
+  //   )
+  // }
 
-  if (status === "error") {
-    return (
-      <Card className="h-[calc(100vh-7rem)] overflow-y-auto p-4">
-        <CreatePost />
-        <div className="text-center text-red-500 p-4">
-          Error loading posts. Please try again later.
-        </div>
-      </Card>
-    )
-  }
+  
 
   return (
     <Card className="h-[calc(100vh-7rem)] overflow-y-auto p-4 space-y-4">
       <CreatePost />
       
-      {posts.map((post) => (
-        <Post key={post.id} post={post} />
-      ))}
+      <div className="space-y-4">
+        {posts.map((post) => (
+          <Post key={post.id} post={post} />
+        ))}
+      </div>
 
-      {/* Infinite scroll trigger */}
+      {/* Loading trigger */}
       <div ref={ref} className="h-10 flex items-center justify-center">
-        {isFetchingNextPage && (
-          <Loader2 className="h-6 w-6 animate-spin" />
-        )}
+        {isFetchingNextPage && <Loader2 className="h-6 w-6 animate-spin" />}
       </div>
 
       {!hasNextPage && posts.length > 0 && (
@@ -124,4 +104,6 @@ export default function Feed() {
     </Card>
   )
 } 
+
+
 
