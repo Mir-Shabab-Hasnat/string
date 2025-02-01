@@ -4,6 +4,9 @@ export const editProfileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   organisation: z.string().optional(),
+  fieldOfStudy: z.string().optional(),
+  role: z.enum(["STUDENT", "RESEARCHER", "PROFESSOR", "PROFESSIONAL", "OTHER"]),
+  bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
   profilePicture: z.string().url().optional().or(z.literal("")),
 })
 
