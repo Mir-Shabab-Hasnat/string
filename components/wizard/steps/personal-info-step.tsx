@@ -9,13 +9,49 @@ import { Button } from "@/components/ui/button"
 import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { UploadButton } from "@/components/ui/uploadthing"
+import { useState } from "react"
+import { toast } from "sonner"
 
 export function PersonalInfoStep() {
   const form = useFormContext()
+  const [previewUrl, setPreviewUrl] = useState("")
 
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-semibold tracking-tight">Personal Information</h2>
+      
+      <div className="flex flex-col items-center gap-4 mb-6">
+        <div className="relative flex h-32 w-32 shrink-0 overflow-hidden rounded-full">
+          <Avatar className="h-full w-full">
+            <AvatarImage 
+              src={previewUrl || "/default-avatar.png"} 
+              alt="Profile picture"
+              className="aspect-square h-full w-full object-cover"
+            />
+            <AvatarFallback className="flex h-full w-full items-center justify-center">
+              {form.watch("firstName")?.[0] || ""}{form.watch("lastName")?.[0] || ""}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+
+        <UploadButton
+          endpoint="imageUploader"
+          onClientUploadComplete={(res) => {
+            if (res?.[0]) {
+              const url = res[0].url;
+              setPreviewUrl(url);
+              form.setValue("profilePicture", url);
+              toast.success("Profile picture uploaded");
+            }
+          }}
+          onUploadError={(error: Error) => {
+            toast.error(`Upload failed: ${error.message}`);
+          }}
+        />
+      </div>
+
       <FormField
         control={form.control}
         name="firstName"

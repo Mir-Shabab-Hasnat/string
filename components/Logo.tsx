@@ -34,7 +34,7 @@ const Logo = ({ size }: { size: number }) => {
       <p
         className={`bg-gradient-to-r from-indigo-400 to-indigo-600 dark:from-indigo-50 dark:to-indigo-300 bg-clip-text font-bold leading-tight tracking-tighter text-transparent ${sizeClass.split(' ')[0]}`}
       >
-        Verse
+        String
       </p>
     </a>
   );

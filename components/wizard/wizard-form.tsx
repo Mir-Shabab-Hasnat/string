@@ -50,6 +50,7 @@ export function WizardForm() {
       firstName: "",
       lastName: "",
       organisation: "",
+      profilePicture: "",
     },
   })
 
