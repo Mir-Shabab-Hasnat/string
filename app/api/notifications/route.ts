@@ -16,10 +16,27 @@ export async function GET() {
       orderBy: {
         createdAt: "desc",
       },
-      take: 20, // Limit to last 20 notifications
+      include: {
+        // Include friend request status for FRIEND_REQUEST type notifications
+        FriendRequest: {
+          select: {
+            status: true
+          }
+        }
+      },
+      take: 20,
     });
 
-    return NextResponse.json(notifications);
+    // Transform the data to include friendRequestStatus
+    const transformedNotifications = notifications.map(notification => ({
+      ...notification,
+      friendRequestStatus: notification.type === 'FRIEND_REQUEST' 
+        ? notification.FriendRequest?.status 
+        : undefined,
+      FriendRequest: undefined // Remove the raw relation data
+    }));
+
+    return NextResponse.json(transformedNotifications);
   } catch (error) {
     console.error("Error fetching notifications:", error);
     return NextResponse.json(
