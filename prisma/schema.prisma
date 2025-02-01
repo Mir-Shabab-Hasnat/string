@@ -97,20 +97,6 @@ model Notification {
   @@index([userId])
 }
 
-model PortfolioItem {
-  id          String   @id @default(uuid())
-  userId      String
-  type        String   // e.g., "project", "publication", "experience"
-  title       String
-  description String
-  startDate   DateTime?
-  endDate     DateTime?
-  url         String?
-  user        User     @relation(fields: [userId], references: [id])
-  
-  @@index([userId])
-}
-
 enum UserRole {
   STUDENT
   PROFESSIONAL

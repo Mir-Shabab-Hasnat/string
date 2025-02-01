@@ -5,12 +5,45 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Edit, MessageSquare, MapPin, Calendar, Mail, BookOpen, Microscope, GraduationCap } from "lucide-react";
+import { Edit, MessageSquare, MapPin, Calendar, Mail, BookOpen, Microscope, GraduationCap, Users } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/Badge"
 
 interface ProfileHeaderProps {
   user: User;
   isOwner: boolean;
 }
+
+// Temporary mock data for followers/following
+const mockConnections = [
+  {
+    id: "1",
+    firstName: "John",
+    lastName: "Doe",
+    username: "johndoe",
+    profilePicture: "/default-avatar.png",
+    role: "STUDENT",
+    organisation: "MIT"
+  },
+  {
+    id: "2",
+    firstName: "Jane",
+    lastName: "Smith",
+    username: "janesmith",
+    profilePicture: "/default-avatar.png",
+    role: "PROFESSIONAL",
+    organisation: "Google"
+  },
+  // Add more mock users as needed
+]
 
 export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
   const roleColors = {
@@ -68,6 +101,97 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
               <div className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 rounded-full ring-4 ring-white" />
             </div>
 
+            {/* Followers/Following Stats */}
+            <div className="flex gap-4 text-sm font-medium">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex flex-col items-center hover:text-blue-600 transition-colors">
+                    <span className="text-2xl font-bold">2.5K</span>
+                    <span className="text-gray-600">Followers</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Followers</DialogTitle>
+                  </DialogHeader>
+                  <ScrollArea className="max-h-[60vh] mt-4">
+                    <div className="space-y-4">
+                      {mockConnections.map((connection) => (
+                        <Link 
+                          key={connection.id} 
+                          href={`/profile/${connection.id}`}
+                          className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                          <Avatar>
+                            <AvatarImage src={connection.profilePicture} />
+                            <AvatarFallback>
+                              {connection.firstName[0]}
+                              {connection.lastName[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-medium">
+                              {connection.firstName} {connection.lastName}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              @{connection.username}
+                            </p>
+                          </div>
+                          <Badge variant="outline">
+                            {connection.role.toLowerCase()}
+                          </Badge>
+                        </Link>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex flex-col items-center hover:text-blue-600 transition-colors">
+                    <span className="text-2xl font-bold">1.2K</span>
+                    <span className="text-gray-600">Following</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Following</DialogTitle>
+                  </DialogHeader>
+                  <ScrollArea className="max-h-[60vh] mt-4">
+                    <div className="space-y-4">
+                      {mockConnections.map((connection) => (
+                        <Link 
+                          key={connection.id} 
+                          href={`/profile/${connection.id}`}
+                          className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                          <Avatar>
+                            <AvatarImage src={connection.profilePicture} />
+                            <AvatarFallback>
+                              {connection.firstName[0]}
+                              {connection.lastName[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-medium">
+                              {connection.firstName} {connection.lastName}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              @{connection.username}
+                            </p>
+                          </div>
+                          <Badge variant="outline">
+                            {connection.role.toLowerCase()}
+                          </Badge>
+                        </Link>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
+            </div>
+
             {/* Quick Action Buttons */}
             <div className="w-full space-y-2 min-w-[200px]">
               {isOwner ? (
@@ -97,18 +221,26 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
                 <>
                   <Button 
                     size="lg" 
-                    className="w-full font-semibold bg-blue-600 hover:bg-blue-700"
+                    className="w-full flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
                   >
-                    <MessageSquare className="w-4 h-4 mr-2" />
+                    <Users className="w-4 h-4" />
+                    Follow
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    className="w-full flex items-center gap-2"
+                  >
+                    <MessageSquare className="w-4 h-4" />
                     Message
                   </Button>
                   <Link href={`/profile/${user.id}/portfolio`} className="w-full">
                     <Button 
                       variant="outline" 
                       size="lg" 
-                      className={`w-full font-semibold ${roleConfig[user.role].color} hover:bg-gray-50`}
+                      className={`w-full flex items-center gap-2 ${roleConfig[user.role].color} hover:bg-gray-50`}
                     >
-                      <RoleIcon className="w-4 h-4 mr-2" />
+                      <RoleIcon className="w-4 h-4" />
                       View Portfolio
                     </Button>
                   </Link>
