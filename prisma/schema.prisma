@@ -26,8 +26,8 @@ model User {
   messages                                      Message[]            @relation("Messages")
   Notification                                  Notification[]
   Post                                          Post[]
-  conversations                                 Conversation[]       @relation("ConversationParticipants")
   feedPreferences                               UserFeedPreferences?
+  conversations                                 Conversation[]       @relation("ConversationParticipants")
 }
 
 model Conversation {
@@ -108,13 +108,13 @@ model Notification {
 }
 
 model UserFeedPreferences {
-  id                String   @id @default(uuid())
-  userId            String   @unique
-  tags              String[]
-  showOtherContent  Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id])
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  tags             String[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  showOtherContent Boolean  @default(false)
+  user             User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }
