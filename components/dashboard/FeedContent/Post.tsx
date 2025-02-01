@@ -27,7 +27,11 @@ export default function Post({ post }: PostProps) {
       <CardHeader className="space-y-0 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2">
-            <LinkUserAvatar userId={post.user.id} size="sm" />
+            <LinkUserAvatar 
+              userId={post.user.id} 
+              size="sm" 
+              imageUrl={post.user.profilePicture}
+            />
             <div>
               <p className="text-sm font-medium">
                 {post.user.firstName} {post.user.lastName}
