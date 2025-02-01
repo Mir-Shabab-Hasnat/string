@@ -26,8 +26,9 @@ model User {
   messages                                      Message[]            @relation("Messages")
   Notification                                  Notification[]
   Post                                          Post[]
-  conversations                                 Conversation[]       @relation("ConversationParticipants")
   feedPreferences                               UserFeedPreferences?
+  conversations                                 Conversation[]       @relation("ConversationParticipants")
+  
   marketplaceItems                              MarketplaceItem[]
   cart                                          Cart?
 }

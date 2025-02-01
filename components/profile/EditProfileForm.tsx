@@ -2,28 +2,38 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { User } from "@prisma/client";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import * as z from "zod";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { User } from "@prisma/client";
 import { UploadButton } from "@/components/ui/uploadthing";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
 import { useState } from "react";
-import { updateProfile } from "@/app/(protected)/profile/[id]/_actions/updateProfile";
-import { editProfileSchema, type EditProfileData } from "@/schemas/profile.schema";
+import { updateProfileSchema } from "@/schemas/user.schema";
+import { z } from "zod";
 
-export default function EditProfileForm({ user }: { user: User }) {
+interface EditProfileFormProps {
+  user: User;
+}
+
+type FormData = z.infer<typeof updateProfileSchema>;
+
+export default function EditProfileForm({ user }: EditProfileFormProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const [previewUrl, setPreviewUrl] = useState(user.profilePicture || "");
-  
-  const form = useForm<EditProfileData>({
-    resolver: zodResolver(editProfileSchema),
+  const [imageUrl, setImageUrl] = useState(user.profilePicture || "");
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(updateProfileSchema),
     defaultValues: {
       firstName: user.firstName,
       lastName: user.lastName,
@@ -32,72 +42,73 @@ export default function EditProfileForm({ user }: { user: User }) {
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: async (data: EditProfileData) => {
-      return updateProfile({ ...data, userId: user.id });
-    },
-    onMutate: () => {
-      toast.loading("Updating profile...");
-    },
-    onSuccess: () => {
-      toast.dismiss();
-      queryClient.invalidateQueries({ queryKey: ['user', user.id] });
-      toast.success("Profile updated successfully");
-      router.push(`/profile/${user.id}`);
-      router.refresh();
-    },
-    onError: (error) => {
-      toast.dismiss();
-      toast.error("Error updating profile: " + (error instanceof Error ? error.message : "Unknown error"));
-    },
-  });
-
-  const onSubmit = async (data: EditProfileData) => {
+  const onSubmit = async (data: FormData) => {
     try {
-      await mutation.mutateAsync(data);
+      // Use the uploaded image URL if available, otherwise keep the existing one
+      const profilePicture = imageUrl || user.profilePicture;
+
+      const res = await fetch(`/api/user/${user.id}/update`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...data,
+          profilePicture,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update profile");
+      }
+
+      toast.success("Profile updated successfully");
+      router.refresh();
+      router.push(`/profile/${user.id}`);
     } catch (error) {
-      // Error is handled in mutation's onError
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
     }
   };
 
   return (
-    <Card className="max-w-lg mx-auto p-6 shadow-md border rounded-xl">
+    <Card>
+      <CardHeader>
+        <CardTitle>Edit Profile</CardTitle>
+      </CardHeader>
       <CardContent>
-        <h2 className="text-xl font-bold mb-4 text-center">Edit Profile</h2>
-
-        {/* Profile Picture */}
-        <div className="flex flex-col items-center gap-4">
-          <Avatar className="h-24 w-24 border-2 border-primary transition-all duration-300 hover:scale-105">
-            <AvatarImage 
-              src={previewUrl || "/default-avatar.png"} 
-              alt="Profile picture"
-              className="aspect-square h-full w-full object-cover rounded-full"
-            />
-            <AvatarFallback className="text-lg font-semibold">
-              {user.firstName[0]}{user.lastName[0]}
-            </AvatarFallback>
-          </Avatar>
-
-          {/* Upload Button */}
-          <UploadButton
-            endpoint="imageUploader"
-            onClientUploadComplete={(res) => {
-              if (res?.[0]) {
-                const url = res[0].url;
-                setPreviewUrl(url);
-                form.setValue("profilePicture", url);
-                toast.success("Profile picture uploaded");
-              }
-            }}
-            onUploadError={(error: Error) => {
-              toast.error(`Upload failed: ${error.message}`);
-            }}
-          />
-        </div>
-
-        {/* Form Fields */}
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Profile Picture Upload */}
+            <div className="space-y-4">
+              <FormLabel>Profile Picture</FormLabel>
+              <div className="flex items-center gap-4">
+                {imageUrl && (
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden">
+                    <Image
+                      src={imageUrl}
+                      alt="Profile picture"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <UploadButton
+                  endpoint="imageUploader"
+                  onClientUploadComplete={(res) => {
+                    if (res && res[0]) {
+                      setImageUrl(res[0].url);
+                      form.setValue("profilePicture", res[0].url);
+                      toast.success("Image uploaded successfully");
+                    }
+                  }}
+                  onUploadError={(error: Error) => {
+                    toast.error(`Failed to upload image: ${error.message}`);
+                  }}
+                />
+              </div>
+            </div>
+
             <FormField
               control={form.control}
               name="firstName"
@@ -105,7 +116,7 @@ export default function EditProfileForm({ user }: { user: User }) {
                 <FormItem>
                   <FormLabel>First Name</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter first name" />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -119,7 +130,7 @@ export default function EditProfileForm({ user }: { user: User }) {
                 <FormItem>
                   <FormLabel>Last Name</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter last name" />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -133,17 +144,23 @@ export default function EditProfileForm({ user }: { user: User }) {
                 <FormItem>
                   <FormLabel>Organization</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter organization" />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Save Button with Loading State */}
-            <Button type="submit" className="w-full mt-2" disabled={mutation.isPending}>
-              {mutation.isPending ? "Saving..." : "Save Changes"}
-            </Button>
+            <div className="flex justify-end gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Save Changes</Button>
+            </div>
           </form>
         </Form>
       </CardContent>
