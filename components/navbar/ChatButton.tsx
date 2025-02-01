@@ -19,8 +19,12 @@ export function ChatButton() {
           <MessageSquare className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[400px] sm:w-[540px] p-0">
-        <SheetHeader className="px-4 py-2">
+      <SheetContent 
+        side="right" 
+        className="w-full p-0"
+        style={{ maxWidth: '100vw' }}
+      >
+        <SheetHeader className="p-4 border-b">
           <SheetTitle>Messages</SheetTitle>
         </SheetHeader>
         <ChatUI />
