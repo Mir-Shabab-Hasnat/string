@@ -2,6 +2,7 @@
 
 import { useUser, useClerk } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,14 +16,25 @@ export default function CustomUserButton() {
   const { signOut } = useClerk()
   const router = useRouter()
 
+  const { data: dbUser } = useQuery({
+    queryKey: ['user', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null
+      const res = await fetch(`/api/user/${user.id}`)
+      if (!res.ok) throw new Error('Failed to fetch user')
+      return res.json()
+    },
+    enabled: !!user?.id
+  })
+
   if (!user) return null
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="outline-none">
         <Avatar className="h-8 w-8">
-          <AvatarImage src={user.imageUrl} alt={user.fullName || "User avatar"} />
-          <AvatarFallback>{user.firstName?.charAt(0) || "U"}</AvatarFallback>
+          <AvatarImage src={dbUser?.profilePicture || "/default-avatar.png"} alt={user.fullName || "User avatar"} />
+          <AvatarFallback>{dbUser?.firstName?.[0] || user.firstName?.[0] || "U"}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

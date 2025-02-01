@@ -1,34 +1,33 @@
-import { currentUser } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 
-export async function PATCH(
+export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const clerkUser = await currentUser()
-    
-    if (!clerkUser || clerkUser.id !== params.id) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
+    const { id } = await Promise.resolve(params)
 
-    const body = await req.json()
-    const { firstName, lastName, organisation, profilePicture } = body
-
-    const updatedUser = await prisma.user.update({
-      where: { id: params.id },
-      data: {
-        firstName,
-        lastName,
-        organisation,
-        profilePicture,
-      },
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        profilePicture: true,
+        organisation: true,
+        role: true,
+      }
     })
 
-    return NextResponse.json(updatedUser)
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 })
+    }
+
+    return NextResponse.json(user)
   } catch (error) {
-    console.error("Error updating user:", error)
+    console.error("Error fetching user:", error)
     return new NextResponse("Internal Server Error", { status: 500 })
   }
 } 
