@@ -27,16 +27,16 @@ model User {
   Notification                                  Notification[]
   Post                                          Post[]
   conversations                                 Conversation[]  @relation("ConversationParticipants")
+  courses                                       Course[]
 }
 
 model Conversation {
-  id           String    @id @default(uuid())
+  id           String    @id @unique @default(uuid())
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   messages     Message[] @relation("ConversationMessages")
   participants User[]    @relation("ConversationParticipants")
 
-  @@unique([id])
   @@index([id])
 }
 
@@ -100,11 +100,31 @@ model Notification {
   relatedId     String?
   createdAt     DateTime       @default(now())
   read          Boolean        @default(false)
-  User          User           @relation(fields: [userId], references: [id])
   FriendRequest FriendRequest? @relation(fields: [relatedId], references: [id])
+  User          User           @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([relatedId])
+}
+
+model Course {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Decimal
+  imageUrl    String?
+  category    String
+  tags        String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  students    Int      @default(0)
+  rating      Float    @default(0)
+  reviewCount Int      @default(0)
+  featured    Boolean  @default(false)
+
+  @@index([authorId])
 }
 
 enum UserRole {
