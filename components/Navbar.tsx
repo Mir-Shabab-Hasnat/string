@@ -6,6 +6,7 @@ import SearchField from "./SearchField"
 import Logo from "./Logo"
 import CustomUserButton from "./CustomUserButton"
 import { NotificationBell } from "./navbar/NotificationBell"
+import { ChatButton } from "./navbar/ChatButton"
 
 export default function Navbar() {
   return (
@@ -27,6 +28,7 @@ export default function Navbar() {
             </div>
             <ThemeToggle />
             <NotificationBell />
+            <ChatButton />
             <CustomUserButton />
           </div>
         </div>

@@ -35,6 +35,9 @@ model Conversation {
   updatedAt    DateTime  @updatedAt
   messages     Message[] @relation("ConversationMessages")
   participants User[]    @relation("ConversationParticipants")
+
+  @@unique([id])
+  @@index([id])
 }
 
 model Message {
@@ -45,6 +48,9 @@ model Message {
   createdAt      DateTime     @default(now())
   conversation   Conversation @relation("ConversationMessages", fields: [conversationId], references: [id])
   sender         User         @relation("Messages", fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
 }
 
 model Post {
@@ -55,6 +61,7 @@ model Post {
   updatedAt DateTime  @updatedAt
   userId    String
   likes     Int       @default(0)
+  tags      String[]
   comments  Comment[]
   user      User      @relation(fields: [userId], references: [id])
 }
@@ -70,31 +77,34 @@ model Comment {
 }
 
 model FriendRequest {
-  id                                   String   @id
+  id                                   String         @id
   senderId                             String
   recipientId                          String
-  status                               String   @default("PENDING")
-  createdAt                            DateTime @default(now())
+  status                               String         @default("PENDING")
+  createdAt                            DateTime       @default(now())
   updatedAt                            DateTime
-  User_FriendRequest_recipientIdToUser User     @relation("FriendRequest_recipientIdToUser", fields: [recipientId], references: [id])
-  User_FriendRequest_senderIdToUser    User     @relation("FriendRequest_senderIdToUser", fields: [senderId], references: [id])
+  User_FriendRequest_recipientIdToUser User           @relation("FriendRequest_recipientIdToUser", fields: [recipientId], references: [id])
+  User_FriendRequest_senderIdToUser    User           @relation("FriendRequest_senderIdToUser", fields: [senderId], references: [id])
+  Notification                         Notification[]
 
   @@index([recipientId])
   @@index([senderId])
 }
 
 model Notification {
-  id        String   @id
-  userId    String
-  type      String
-  title     String
-  content   String
-  relatedId String?
-  createdAt DateTime @default(now())
-  read      Boolean  @default(false)
-  User      User     @relation(fields: [userId], references: [id])
+  id            String         @id
+  userId        String
+  type          String
+  title         String
+  content       String
+  relatedId     String?
+  createdAt     DateTime       @default(now())
+  read          Boolean        @default(false)
+  User          User           @relation(fields: [userId], references: [id])
+  FriendRequest FriendRequest? @relation(fields: [relatedId], references: [id])
 
   @@index([userId])
+  @@index([relatedId])
 }
 
 enum UserRole {
