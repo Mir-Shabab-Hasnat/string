@@ -11,7 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Store } from "lucide-react"
+import { Bell } from "lucide-react"
+import { Button } from "./ui/button"
 
 export default function CustomUserButton() {
   const { user } = useUser()
@@ -32,26 +33,32 @@ export default function CustomUserButton() {
   if (!user) return null
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="outline-none">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={dbUser?.profilePicture || "/default-avatar.png"} alt={user.fullName || "User avatar"} />
-          <AvatarFallback>{dbUser?.firstName?.[0] || user.firstName?.[0] || "U"}</AvatarFallback>
-        </Avatar>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => router.push(`/profile/${user.id}`)}>
-          Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/marketplace')}>
-          <Store className="mr-2 h-4 w-4" />
-          Marketplace
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut()}>
-          Log out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-2">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
+      >
+        <Bell className="h-4 w-4" />
+      </Button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger className="outline-none">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={dbUser?.profilePicture || "/default-avatar.png"} alt={user.fullName || "User avatar"} />
+            <AvatarFallback>{dbUser?.firstName?.[0] || user.firstName?.[0] || "U"}</AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => router.push(`/profile/${user.id}`)}>
+            Profile
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => signOut()}>
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 } 
