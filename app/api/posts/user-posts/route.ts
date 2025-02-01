@@ -9,9 +9,27 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get user's friends IDs
+    const friends = await prisma.friendRequest.findMany({
+      where: {
+        OR: [
+          { senderId: user.id, status: "ACCEPTED" },
+          { recipientId: user.id, status: "ACCEPTED" },
+        ],
+      },
+    });
+
+    // Extract friend IDs
+    const friendIds = friends.map(friend => 
+      friend.senderId === user.id ? friend.recipientId : friend.senderId
+    );
+
+    // Get posts from user and friends
     const posts = await prisma.post.findMany({
       where: {
-        userId: user.id,
+        userId: {
+          in: [user.id, ...friendIds],
+        },
       },
       orderBy: {
         createdAt: 'desc'

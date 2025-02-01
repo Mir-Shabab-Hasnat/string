@@ -9,6 +9,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get all accepted friends
     const friends = await prisma.friendRequest.findMany({
       where: {
         OR: [
@@ -18,19 +19,25 @@ export async function POST(req: Request) {
       },
     });
 
-    const results = await Promise.all(
-      friends.map(async (friend) => {
+    // Use transaction to ensure atomicity
+    await prisma.$transaction(async (tx) => {
+      for (const friend of friends) {
         const friendId = friend.senderId === user.id ? friend.recipientId : friend.senderId;
-        
-        try {
-          // Try to create the conversation
-          const conversation = await prisma.conversation.upsert({
-            where: {
-              unique_participant_pairs: {
-                participantIds: [user.id, friendId].sort(), // Sort to ensure consistent order
-              },
-            },
-            create: {
+
+        // Check if conversation exists using count instead of findFirst
+        const conversationCount = await tx.conversation.count({
+          where: {
+            AND: [
+              { participants: { some: { id: user.id } } },
+              { participants: { some: { id: friendId } } },
+            ],
+          },
+        });
+
+        // Only create if no conversation exists
+        if (conversationCount === 0) {
+          await tx.conversation.create({
+            data: {
               participants: {
                 connect: [
                   { id: user.id },
@@ -38,17 +45,12 @@ export async function POST(req: Request) {
                 ],
               },
             },
-            update: {}, // Do nothing if it exists
           });
-          return { success: true, conversationId: conversation.id };
-        } catch (error) {
-          console.error(`Failed to ensure conversation with friend ${friendId}:`, error);
-          return { success: false, friendId };
         }
-      })
-    );
+      }
+    });
 
-    return NextResponse.json({ results });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error ensuring conversations:", error);
     return NextResponse.json(
