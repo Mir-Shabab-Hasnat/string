@@ -6,14 +6,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useQuery } from "@tanstack/react-query"
 import { User } from "@prisma/client"
+import { cn } from "@/lib/utils"
+
+import { User2 } from "lucide-react"
+import Link from "next/link"
 
 interface LinkUserAvatarProps {
-  size?: "sm" | "default" | "lg"
-  className?: string
-  userId: string
+  userId: string;
+  size?: "sm" | "md" | "lg";
+  imageUrl?: string | null;
 }
 
-export default function LinkUserAvatar({ size = "default", className, userId }: LinkUserAvatarProps) {
+export default function LinkUserAvatar({ userId, size = "md", imageUrl }: LinkUserAvatarProps) {
   const { user } = useUser()
   const router = useRouter()
 
@@ -32,20 +36,16 @@ export default function LinkUserAvatar({ size = "default", className, userId }: 
 
   const sizeClasses = {
     sm: "h-8 w-8",
-    default: "h-10 w-10",
+    md: "h-10 w-10",
     lg: "h-12 w-12"
   }
 
   return (
-    <Button
-      variant="ghost"
-      className="p-0 h-auto"
-      onClick={() => router.push(`/profile/${user.id}`)}
-    >
-      <Avatar className={`${sizeClasses[size]} ${className || ""}`}>
-        <AvatarImage src={dbUser?.profilePicture || "/default-avatar.png"} alt={dbUser?.firstName || "User avatar"} />
+    <Link href={`/profile/${userId}`}>
+      <Avatar className={cn(sizeClasses[size])}>
+        <AvatarImage src={imageUrl || dbUser?.profilePicture || "/default-avatar.png"} alt={dbUser?.firstName || "User avatar"} />
         <AvatarFallback>{dbUser?.firstName?.[0] || "U"}</AvatarFallback>
       </Avatar>
-    </Button>
+    </Link>
   )
 }
