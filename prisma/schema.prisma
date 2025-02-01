@@ -35,6 +35,9 @@ model Conversation {
   updatedAt    DateTime  @updatedAt
   messages     Message[] @relation("ConversationMessages")
   participants User[]    @relation("ConversationParticipants")
+
+  @@unique([id])
+  @@index([id])
 }
 
 model Message {
@@ -45,6 +48,9 @@ model Message {
   createdAt      DateTime     @default(now())
   conversation   Conversation @relation("ConversationMessages", fields: [conversationId], references: [id])
   sender         User         @relation("Messages", fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
 }
 
 model Post {
@@ -55,7 +61,7 @@ model Post {
   updatedAt DateTime  @updatedAt
   userId    String
   likes     Int       @default(0)
-  tags      String[]  @default([])
+  tags      String[]
   comments  Comment[]
   user      User      @relation(fields: [userId], references: [id])
 }
@@ -94,10 +100,11 @@ model Notification {
   relatedId     String?
   createdAt     DateTime       @default(now())
   read          Boolean        @default(false)
-  FriendRequest FriendRequest? @relation(fields: [relatedId], references: [id])
   User          User           @relation(fields: [userId], references: [id])
+  FriendRequest FriendRequest? @relation(fields: [relatedId], references: [id])
 
   @@index([userId])
+  @@index([relatedId])
 }
 
 enum UserRole {
