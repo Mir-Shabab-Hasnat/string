@@ -27,12 +27,13 @@ export function WizardForm() {
         },
         body: JSON.stringify({
           ...data,
-          profilePicture: data.profilePicture || null,
+          profilePicture: data.profilePicture || "",
         }),
       })
       
       if (!response.ok) {
-        throw new Error("Failed to create user")
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || "Failed to create user");
       }
       
       return response.json()
@@ -42,7 +43,7 @@ export function WizardForm() {
       router.push("/dashboard")
     },
     onError: (error) => {
-      toast.error("Something went wrong. Please try again.")
+      toast.error(error instanceof Error ? error.message : "Something went wrong. Please try again.")
       console.error("Error creating profile:", error)
     },
   })

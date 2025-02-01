@@ -8,24 +8,25 @@ datasource db {
 }
 
 model User {
-  id             String         @id
-  username       String         @unique
-  email          String         @unique
-  firstName      String
-  lastName       String
-  birthDate      DateTime
-  organisation   String?
-  role           UserRole
-  isActive       Boolean        @default(true)
-  profilePicture String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  Comment        Comment[]
-  messages       Message[]      @relation("Messages")
-  Post           Post[]
-  following      Follow[]       @relation("following")
-  followers      Follow[]       @relation("followers")
-  conversations  Conversation[] @relation("ConversationParticipants")
+  id                                            String          @id
+  username                                      String          @unique
+  email                                         String          @unique
+  firstName                                     String
+  lastName                                      String
+  birthDate                                     DateTime
+  organisation                                  String?
+  role                                          UserRole
+  isActive                                      Boolean         @default(true)
+  profilePicture                                String?
+  createdAt                                     DateTime        @default(now())
+  updatedAt                                     DateTime        @updatedAt
+  Comment                                       Comment[]
+  FriendRequest_FriendRequest_recipientIdToUser FriendRequest[] @relation("FriendRequest_recipientIdToUser")
+  FriendRequest_FriendRequest_senderIdToUser    FriendRequest[] @relation("FriendRequest_senderIdToUser")
+  messages                                      Message[]       @relation("Messages")
+  Notification                                  Notification[]
+  Post                                          Post[]
+  conversations                                 Conversation[]  @relation("ConversationParticipants")
 }
 
 model Conversation {
@@ -54,7 +55,6 @@ model Post {
   updatedAt DateTime  @updatedAt
   userId    String
   likes     Int       @default(0)
-  tags      String[]  @default([])
   comments  Comment[]
   user      User      @relation(fields: [userId], references: [id])
 }
@@ -69,18 +69,32 @@ model Comment {
   user      User     @relation(fields: [userId], references: [id])
 }
 
-model Follow {
-  id          String   @id @default(cuid())
-  followerId  String
-  followingId String
-  createdAt   DateTime @default(now())
-  follower    User     @relation("following", fields: [followerId], references: [id])
-  following   User     @relation("followers", fields: [followingId], references: [id])
+model FriendRequest {
+  id                                   String   @id
+  senderId                             String
+  recipientId                          String
+  status                               String   @default("PENDING")
+  createdAt                            DateTime @default(now())
+  updatedAt                            DateTime
+  User_FriendRequest_recipientIdToUser User     @relation("FriendRequest_recipientIdToUser", fields: [recipientId], references: [id])
+  User_FriendRequest_senderIdToUser    User     @relation("FriendRequest_senderIdToUser", fields: [senderId], references: [id])
 
-  @@unique([followerId, followingId])
-  @@index([followerId])
-  @@index([followingId])
-  @@map("follows")
+  @@index([recipientId])
+  @@index([senderId])
+}
+
+model Notification {
+  id        String   @id
+  userId    String
+  type      String
+  title     String
+  content   String
+  relatedId String?
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
+  User      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 enum UserRole {
