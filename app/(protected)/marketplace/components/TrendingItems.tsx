@@ -4,13 +4,19 @@ import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ItemDialog } from "./ItemDialog";
+import { toast } from "sonner";
 
 interface TrendingItem {
   id: string;
   title: string;
   price: number;
   description: string;
+  category?: string;
+  condition?: string;
+  location?: string;
   seller: {
+    id: string;
     name: string;
     image: string;
   };
@@ -19,6 +25,8 @@ interface TrendingItem {
 export function TrendingItems() {
   const [items, setItems] = useState<TrendingItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedItem, setSelectedItem] = useState<TrendingItem | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const trackItemInteraction = async (itemId: string, type: 'view' | 'click') => {
     try {
@@ -76,71 +84,116 @@ export function TrendingItems() {
     setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
   };
 
+  const handleItemClick = (item: TrendingItem) => {
+    const dialogItem = {
+      ...item,
+      seller: {
+        id: item.seller.id,
+        name: item.seller.name,
+        image: item.seller.image
+      }
+    };
+    setSelectedItem(dialogItem);
+    setDialogOpen(true);
+    trackItemInteraction(item.id, 'click');
+  };
+
+  const handleAddToCart = async (itemId: string) => {
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ itemId }),
+      });
+
+      if (response.ok) {
+        toast.success("Item added to cart");
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error("Failed to add item to cart");
+    }
+  };
+
   if (items.length === 0) return null;
 
   return (
-    <div className="relative w-full overflow-hidden bg-accent/50 rounded-lg p-6 mb-8">
-      <h2 className="text-2xl font-bold mb-4">Trending Items</h2>
-      <div className="relative h-[200px]">
-        <div className="absolute inset-y-0 left-0 flex items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full"
-            onClick={prevSlide}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="absolute inset-y-0 right-0 flex items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full"
-            onClick={nextSlide}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="flex transition-transform duration-500 h-full" 
-          style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
-          {items.map((item, index) => (
-            <div
-              key={item.id}
-              className={cn(
-                "w-full flex-shrink-0 px-12 transition-opacity duration-300",
-                index === currentIndex ? "opacity-100" : "opacity-0"
-              )}
+    <>
+      <div className="relative w-full overflow-hidden bg-accent/50 rounded-lg p-6 mb-8">
+        <h2 className="text-2xl font-bold mb-4">Trending Items</h2>
+        <div className="relative h-[200px]">
+          <div className="absolute inset-y-0 left-0 flex items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={prevSlide}
             >
-              <div className="bg-background rounded-lg p-6 shadow-lg max-w-2xl mx-auto">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                    <p className="text-muted-foreground line-clamp-2">{item.description}</p>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="absolute inset-y-0 right-0 flex items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={nextSlide}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex transition-transform duration-500 h-full" 
+            style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
+            {items.map((item, index) => (
+              <div
+                key={item.id}
+                className={cn(
+                  "w-full flex-shrink-0 px-12 transition-opacity duration-300",
+                  index === currentIndex ? "opacity-100" : "opacity-0"
+                )}
+              >
+                <div 
+                  className="bg-background rounded-lg p-6 shadow-lg max-w-2xl mx-auto cursor-pointer hover:shadow-xl transition-shadow"
+                  onClick={() => handleItemClick(item)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                      <p className="text-muted-foreground line-clamp-2">{item.description}</p>
+                    </div>
+                    <span className="text-2xl font-bold">${item.price}</span>
                   </div>
-                  <span className="text-2xl font-bold">${item.price}</span>
-                </div>
-                <div className="flex items-center mt-4">
+                  <div className="flex items-center mt-4">
 
-                  <span className="text-sm text-muted-foreground">{item.seller.name}</span>
+                    <span className="text-sm text-muted-foreground">{item.seller.name}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-2 pb-2">
-          {items.map((_, index) => (
-            <button
-              key={index}
-              className={cn(
-                "w-2 h-2 rounded-full transition-colors",
-                index === currentIndex ? "bg-primary" : "bg-primary/30"
-              )}
-              onClick={() => setCurrentIndex(index)}
-            />
-          ))}
+            ))}
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-2 pb-2">
+            {items.map((_, index) => (
+              <button
+                key={index}
+                className={cn(
+                  "w-2 h-2 rounded-full transition-colors",
+                  index === currentIndex ? "bg-primary" : "bg-primary/30"
+                )}
+                onClick={() => setCurrentIndex(index)}
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+
+      <ItemDialog 
+        item={selectedItem}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onAddToCart={handleAddToCart}
+      />
+    </>
   );
 } 

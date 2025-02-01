@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { ShoppingCart } from "lucide-react";
 import { CartDialog } from "./components/CartDialog";
 import { TrendingItems } from "./components/TrendingItems";
+import { ItemDialog } from "./components/ItemDialog";
 
 interface MarketplaceItem {
   id: string;
@@ -27,6 +28,7 @@ interface MarketplaceItem {
   condition?: string;
   location?: string;
   seller: {
+    id: string;
     name: string;
     image: string;
   };
@@ -41,6 +43,8 @@ export default function Marketplace() {
   const [isLoading, setIsLoading] = useState(true);
   const [cartOpen, setCartOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null);
+  const [itemDialogOpen, setItemDialogOpen] = useState(false);
 
   const fetchItems = async () => {
     try {
@@ -89,6 +93,19 @@ export default function Marketplace() {
       console.error('Error adding to cart:', error);
       toast.error("Failed to add item to cart");
     }
+  };
+
+  const handleItemClick = (item: MarketplaceItem) => {
+    const dialogItem = {
+      ...item,
+      seller: {
+        id: item.seller.id,
+        name: item.seller.name,
+        image: item.seller.image
+      }
+    };
+    setSelectedItem(dialogItem);
+    setItemDialogOpen(true);
   };
 
   useEffect(() => {
@@ -144,27 +161,28 @@ export default function Marketplace() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item) => (
-            <div key={item.id} className="border rounded-lg p-4 shadow-sm">
+            <div 
+              key={item.id} 
+              className="border rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleItemClick(item)}
+            >
               <h3 className="text-lg font-semibold">{item.title}</h3>
-              <p className="text-gray-600 mt-2">{item.description}</p>
+              <p className="text-gray-600 mt-2 line-clamp-2">{item.description}</p>
               <div className="flex justify-between items-center mt-4">
                 <span className="text-xl font-bold">${item.price}</span>
-                <div className="flex items-center gap-2">
-                 
-                  <span className="text-sm text-gray-500">{item.seller.name}</span>
-                  <Button 
-                    onClick={() => addToCart(item.id)}
-                    variant="secondary"
-                    size="sm"
-                  >
-                    Add to Cart
-                  </Button>
-                </div>
+                <span className="text-sm text-gray-500">{item.seller.name}</span>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      <ItemDialog 
+        item={selectedItem}
+        open={itemDialogOpen}
+        onOpenChange={setItemDialogOpen}
+        onAddToCart={addToCart}
+      />
 
       <CartDialog 
         isOpen={cartOpen}
