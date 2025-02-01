@@ -8,6 +8,8 @@ import CustomUserButton from "./CustomUserButton"
 import { NotificationBell } from "./navbar/NotificationBell"
 import { ChatButton } from "./navbar/ChatButton"
 import { FeedManagerButton } from "./navbar/FeedManagerButton"
+import { Store } from "lucide-react"
+import { Button } from "./ui/button"
 
 export default function Navbar() {
   return (
@@ -15,9 +17,7 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-4 mb-4 mt-3">
         <div className="flex h-14 items-center justify-between">
           <div className="flex items-center gap-8">
-            
-              <Logo size={3}/>
-            
+            <Logo size={3}/>
             <div className="hidden w-[300px] md:block">
               <SearchField />
             </div>
@@ -27,6 +27,11 @@ export default function Navbar() {
             <div className="block md:hidden">
               <SearchField />
             </div>
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/marketplace">
+                <Store className="h-5 w-5" />
+              </Link>
+            </Button>
             <ThemeToggle />
             <NotificationBell />
             <ChatButton />
