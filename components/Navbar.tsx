@@ -5,6 +5,7 @@ import { ThemeToggle } from "./landing/ThemeToggle"
 import SearchField from "./SearchField"
 import Logo from "./Logo"
 import CustomUserButton from "./CustomUserButton"
+import UserInbox from "./UserInbox"
 
 export default function Navbar() {
   return (
@@ -24,6 +25,7 @@ export default function Navbar() {
             <div className="block md:hidden">
               <SearchField />
             </div>
+            <UserInbox />
             <ThemeToggle />
             <CustomUserButton />
           </div>

@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id             String         @id
+  id             String         @id @default(cuid())
   username       String         @unique
   email          String         @unique
   firstName      String
@@ -23,13 +23,16 @@ model User {
   organisation   String?
   role           UserRole
   isActive       Boolean        @default(true)
-  profilePicture String? // URL to the user's profile picture
+  profilePicture String?        // URL to the user's profile picture
   messages       Message[]      @relation("Messages")
   conversations  Conversation[] @relation("ConversationParticipants")
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   Post           Post[]
   Comment        Comment[]
+  sentRequests   FriendRequest[] @relation("SentRequests")
+  receivedRequests FriendRequest[] @relation("ReceivedRequests")
+  notifications  Notification[]
 }
 
 enum UserRole {
@@ -76,4 +79,34 @@ model Comment {
   postId    String
   user      User     @relation(fields: [userId], references: [id])
   userId    String
+}
+
+model FriendRequest {
+  id          String   @id @default(cuid())
+  senderId    String
+  recipientId String
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sender    User @relation("SentRequests", fields: [senderId], references: [id])
+  recipient User @relation("ReceivedRequests", fields: [recipientId], references: [id])
+
+  @@index([senderId])
+  @@index([recipientId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  content   String
+  relatedId String?
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
