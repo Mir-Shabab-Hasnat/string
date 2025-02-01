@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sheet";
 import { MessageList } from './chat/MessageList';
 import { MessageInput } from './chat/MessageInput';
+import { useUser } from "@clerk/nextjs";
 
 type Notification = {
   id: string;
@@ -47,7 +48,8 @@ export default function UserInbox() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [pendingRequests, setPendingRequests] = useState<string[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const currentUserId = "user123"; // Replace with actual user ID
+  const { user } = useUser();
+  const currentUserId = user?.id;
 
   const searchUsers = async (query: string) => {
     if (!query.trim()) {
@@ -67,7 +69,13 @@ export default function UserInbox() {
   };
 
   const sendFriendRequest = async (recipientId: string) => {
+    if (!currentUserId) {
+      alert('Please log in to send friend requests');
+      return;
+    }
+
     try {
+      // Send friend request
       const response = await fetch('/api/friend-requests', {
         method: 'POST',
         headers: {
@@ -75,13 +83,34 @@ export default function UserInbox() {
         },
         body: JSON.stringify({
           senderId: currentUserId,
-          recipientId,
+          recipientId: recipientId
         }),
       });
 
       if (response.ok) {
-        setPendingRequests([...pendingRequests, recipientId]);
-        alert('Friend request sent successfully!');
+        // Create notification for recipient
+        const notificationResponse = await fetch('/api/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            recipientId: recipientId,
+            title: 'New Friend Request',
+            content: `${user?.firstName} ${user?.lastName} sent you a friend request`,
+            type: 'FRIEND_REQUEST'
+          }),
+        });
+
+        if (notificationResponse.ok) {
+          setPendingRequests([...pendingRequests, recipientId]);
+          alert('Friend request sent successfully!');
+        } else {
+          console.error('Failed to create notification');
+        }
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to send friend request');
       }
     } catch (error) {
       console.error('Failed to send friend request:', error);
@@ -243,14 +272,14 @@ export default function UserInbox() {
               className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
             />
           </div>
-          {selectedConversation ? (
+          {selectedConversation && currentUserId ? (
             <div className="flex flex-col h-[calc(100vh-150px)]">
               <MessageList messages={messages} currentUserId={currentUserId} />
               <MessageInput onSend={(content) => {/* Handle sending message */}} />
             </div>
           ) : (
             <div className="text-muted-foreground text-center mt-4">
-              Select a conversation to start chatting
+              {currentUserId ? "Select a conversation to start chatting" : "Please log in to chat"}
             </div>
           )}
         </div>
