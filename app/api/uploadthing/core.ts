@@ -1,5 +1,6 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { currentUser } from "@clerk/nextjs/server";
+import prisma from "@/lib/prisma";
 
 const f = createUploadthing();
 
@@ -14,6 +15,23 @@ export const ourFileRouter = {
         if (!user) throw new Error("Unauthorized");
         return { userId: user.id };
       
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      return {
+        name: file.name,
+        key: file.key,
+        url: file.url,
+        uploaderId: metadata.userId
+      }
+    }),
+
+  postImage: f({
+    image: { maxFileSize: "4MB", maxFileCount: 4 }
+  })
+    .middleware(async () => {
+      const user = await currentUser();
+      if (!user) throw new Error("Unauthorized");
+      return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       return {
