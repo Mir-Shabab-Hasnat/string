@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import LinkUserAvatar from "@/components/LinkUserAvatar";
+import { UserCircle } from "lucide-react";
 
 interface PostProps {
   post: {
@@ -27,11 +28,17 @@ export default function Post({ post }: PostProps) {
       <CardHeader className="space-y-0 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2">
-            <LinkUserAvatar 
-              userId={post.user.id} 
-              size="sm" 
-              imageUrl={post.user.profilePicture}
-            />
+            {post.user.profilePicture ? (
+              <LinkUserAvatar 
+                userId={post.user.id} 
+                size="sm" 
+                imageUrl={post.user.profilePicture}
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                <UserCircle className="h-7 w-7 text-muted-foreground" />
+              </div>
+            )}
             <div>
               <p className="text-sm font-medium">
                 {post.user.firstName} {post.user.lastName}
