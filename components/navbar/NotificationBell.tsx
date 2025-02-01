@@ -44,6 +44,27 @@ export function NotificationBell() {
     }
   };
 
+  const markNotificationsAsRead = async () => {
+    try {
+      await fetch('/api/notifications/mark-read', {
+        method: 'POST',
+      });
+      setNotifications((prev) =>
+        prev.map((notification) => ({ ...notification, read: true }))
+      );
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Error marking notifications as read:', error);
+    }
+  };
+
+  const handlePopoverChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      markNotificationsAsRead();
+    }
+  };
+
   const handleFriendRequest = async (notificationId: string, requestId: string, action: 'accept' | 'reject') => {
     try {
       const response = await fetch(`/api/friend-request/${requestId}`, {
@@ -67,33 +88,23 @@ export function NotificationBell() {
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handlePopoverChange}>
       <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          aria-label="Open notifications"
-        >
-          <Bell className="h-5 w-5" />
+        <Button variant="ghost" className="relative">
+          <Bell className="w-6 h-6" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-600 text-white text-xs flex items-center justify-center">
+            <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
               {unreadCount}
             </span>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="p-4 border-b">
-          <h3 className="font-semibold">Notifications</h3>
-        </div>
-        <ScrollArea className="h-[400px]">
+      <PopoverContent className="w-80">
+        <ScrollArea className="h-64">
           {notifications.length === 0 ? (
-            <div className="p-4 text-center text-sm text-gray-500">
-              No notifications
-            </div>
+            <div className="p-4 text-center text-gray-500">No notifications</div>
           ) : (
-            <div className="divide-y">
+            <div>
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
@@ -110,7 +121,6 @@ export function NotificationBell() {
                       </p>
                     </div>
                   </div>
-                  
                   {notification.type === 'FRIEND_REQUEST' && !notification.read && (
                     <div className="mt-2 flex gap-2">
                       <Button
