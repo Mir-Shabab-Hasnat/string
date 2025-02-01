@@ -24,11 +24,11 @@ export default async function ProfilePage({
   const isOwner = viewer?.id === profile.id
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <div className="relative">
-        {/* Background Banner */}
-        <div className="absolute inset-0 h-[300px] bg-gradient-to-br from-blue-600 to-purple-700" />
+        {/* Background Banner - updated gradient */}
+        <div className="absolute inset-0 h-[300px] bg-gradient-to-br from-blue-600 to-purple-700 dark:from-blue-800 dark:to-purple-900" />
         
         {/* Content Container */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,9 +42,9 @@ export default async function ProfilePage({
         </div>
       </div>
 
-      {/* Main Content Section */}
+      {/* Main Content Section - updated background */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12">
-        <div className="bg-white rounded-xl shadow-sm">
+        <div className="bg-background border rounded-xl shadow-sm">
           <ProfileTabs 
             user={profile}
             isOwner={isOwner} 
