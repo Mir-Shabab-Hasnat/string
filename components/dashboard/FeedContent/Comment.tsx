@@ -34,15 +34,17 @@ export default function Comment({ comment }: CommentProps) {
       </div>
       <div className="flex-1">
         <div className="bg-muted rounded-lg px-3 py-2">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium">
-              {comment.user.firstName} {comment.user.lastName}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(comment.createdAt), {
-                addSuffix: true,
-              })}
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium">
+                {comment.user.firstName} {comment.user.lastName}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {formatDistanceToNow(new Date(comment.createdAt), {
+                  addSuffix: true,
+                })}
+              </span>
+            </div>
           </div>
           <p className="text-sm mt-1">{comment.content}</p>
         </div>

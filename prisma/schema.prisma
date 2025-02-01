@@ -28,9 +28,10 @@ model User {
   Post                                          Post[]
   feedPreferences                               UserFeedPreferences?
   conversations                                 Conversation[]       @relation("ConversationParticipants")
-  
-  marketplaceItems                              MarketplaceItem[]
-  cart                                          Cart?
+
+  marketplaceItems MarketplaceItem[]
+  cart             Cart?
+  PostAuthenticity PostAuthenticity[]
 }
 
 model Conversation {
@@ -57,16 +58,17 @@ model Message {
 }
 
 model Post {
-  id        String    @id @default(uuid())
-  content   String
-  imageUrl  String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  userId    String
-  likes     Int       @default(0)
-  tags      String[]
-  comments  Comment[]
-  user      User      @relation(fields: [userId], references: [id])
+  id           String             @id @default(uuid())
+  content      String
+  imageUrl     String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  userId       String
+  likes        Int                @default(0)
+  tags         String[]
+  comments     Comment[]
+  user         User               @relation(fields: [userId], references: [id])
+  authenticity PostAuthenticity[]
 }
 
 model Comment {
@@ -77,6 +79,20 @@ model Comment {
   userId    String
   post      Post     @relation(fields: [postId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model PostAuthenticity {
+  id          String   @id @default(uuid())
+  postId      String
+  userId      String
+  isAuthentic Boolean
+  createdAt   DateTime @default(now())
+  post        Post     @relation(fields: [postId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
 }
 
 model FriendRequest {
@@ -136,8 +152,8 @@ model MarketplaceItem {
   sellerId    String
   sold        Boolean      @default(false)
   CartItem    CartItem[]
-  views       Int            @default(0)
-  clickCount  Int            @default(0)
+  views       Int          @default(0)
+  clickCount  Int          @default(0)
 
   @@index([sellerId])
 }

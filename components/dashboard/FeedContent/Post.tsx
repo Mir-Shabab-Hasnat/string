@@ -6,11 +6,18 @@ import Image from "next/image";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageCircle, UserCircle } from "lucide-react";
+import { MessageCircle, UserCircle, CheckCircle2, XCircle } from "lucide-react";
 import LinkUserAvatar from "@/components/LinkUserAvatar";
 import Comment from "./Comment";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 interface PostProps {
   post: {
@@ -40,7 +47,16 @@ export default function Post({ post }: PostProps) {
       if (!response.ok) throw new Error("Failed to fetch comments");
       return response.json();
     },
-    enabled: showComments,
+    enabled: true,
+  });
+
+  const { data: authenticity } = useQuery({
+    queryKey: ["post-authenticity", post.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/posts/${post.id}/authenticity`);
+      if (!response.ok) throw new Error("Failed to fetch authenticity");
+      return response.json();
+    },
   });
 
   const createComment = useMutation({
@@ -90,6 +106,23 @@ export default function Post({ post }: PostProps) {
     },
   });
 
+  const updateAuthenticity = useMutation({
+    mutationFn: async (isAuthentic: boolean) => {
+      const response = await fetch(`/api/posts/${post.id}/authenticity`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isAuthentic }),
+      });
+      if (!response.ok) throw new Error("Failed to update authenticity");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["post-authenticity", post.id],
+      });
+    },
+  });
+
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -121,6 +154,37 @@ export default function Post({ post }: PostProps) {
               </p>
             </div>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className={cn(
+                  "h-8 w-8 p-0",
+                  authenticity?.userVote === true && "text-green-500",
+                  authenticity?.userVote === false && "text-red-500"
+                )}
+              >
+                <CheckCircle2 className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem
+                onClick={() => updateAuthenticity.mutate(true)}
+                className="text-green-500"
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Authentic ({authenticity?.counts.authentic || 0})
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => updateAuthenticity.mutate(false)}
+                className="text-red-500"
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Unauthentic ({authenticity?.counts.unauthentic || 0})
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -158,7 +222,7 @@ export default function Post({ post }: PostProps) {
             onClick={() => setShowComments(!showComments)}
           >
             <MessageCircle className="h-4 w-4 mr-2" />
-            Comments
+            Comments {comments.length > 0 && `(${comments.length})`}
           </Button>
         </div>
         

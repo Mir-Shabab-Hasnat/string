@@ -6,10 +6,11 @@ export async function GET(
   req: Request,
   { params }: { params: { postId: string } }
 ) {
+  const {postId} = await params
   try {
     const comments = await prisma.comment.findMany({
       where: {
-        postId: params.postId,
+        postId: postId,
       },
       include: {
         user: {
