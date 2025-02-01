@@ -135,6 +135,8 @@ model MarketplaceItem {
   sellerId    String
   sold        Boolean      @default(false)
   CartItem    CartItem[]
+  views       Int            @default(0)
+  clickCount  Int            @default(0)
 
   @@index([sellerId])
 }

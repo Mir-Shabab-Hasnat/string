@@ -15,6 +15,7 @@ import MarketplaceContent from "@/components/marketplace/MarketplaceContent"
 import { toast } from "sonner";
 import { ShoppingCart } from "lucide-react";
 import { CartDialog } from "./components/CartDialog";
+import { TrendingItems } from "./components/TrendingItems";
 
 interface MarketplaceItem {
   id: string;
@@ -97,6 +98,7 @@ export default function Marketplace() {
 
   return (
     <div className="container mx-auto py-8">
+      <TrendingItems />
       <div className="flex items-center gap-4 mb-8">
         <Input
           placeholder="Search items..."
