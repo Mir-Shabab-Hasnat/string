@@ -121,11 +121,7 @@ export function TrendingItems() {
                   <span className="text-2xl font-bold">${item.price}</span>
                 </div>
                 <div className="flex items-center mt-4">
-                  <img
-                    src={item.seller.image}
-                    alt={item.seller.name}
-                    className="w-6 h-6 rounded-full mr-2"
-                  />
+
                   <span className="text-sm text-muted-foreground">{item.seller.name}</span>
                 </div>
               </div>

@@ -150,11 +150,7 @@ export default function Marketplace() {
               <div className="flex justify-between items-center mt-4">
                 <span className="text-xl font-bold">${item.price}</span>
                 <div className="flex items-center gap-2">
-                  <img
-                    src={item.seller.image}
-                    alt={item.seller.name}
-                    className="w-6 h-6 rounded-full"
-                  />
+                 
                   <span className="text-sm text-gray-500">{item.seller.name}</span>
                   <Button 
                     onClick={() => addToCart(item.id)}
