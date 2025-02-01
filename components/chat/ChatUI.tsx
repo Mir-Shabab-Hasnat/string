@@ -36,17 +36,19 @@ export default function ChatUI() {
   const queryClient = useQueryClient();
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messageInput, setMessageInput] = useState("");
+  const [ensureInitialized, setEnsureInitialized] = useState(false);
 
-  // Add this useEffect
+  // Replace the useEffect with this one
   useEffect(() => {
-    if (user) {
+    if (user && !ensureInitialized) {
+      setEnsureInitialized(true);
       fetch('/api/conversations/ensure', { method: 'POST' })
         .then(() => {
           queryClient.invalidateQueries({ queryKey: ["conversations"] });
         })
         .catch(console.error);
     }
-  }, [user, queryClient]);
+  }, [user, queryClient, ensureInitialized]);
 
   // Fetch conversations
   const { data: conversations } = useQuery<Conversation[]>({
