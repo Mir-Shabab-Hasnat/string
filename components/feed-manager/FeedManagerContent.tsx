@@ -42,6 +42,7 @@ export default function FeedManagerContent({ initialPreferences }: FeedManagerCo
 
       toast.success("Feed preferences saved successfully");
       router.refresh();
+      router.push("/dashboard")
     } catch (error) {
       toast.error("Failed to save preferences");
       console.error(error);
