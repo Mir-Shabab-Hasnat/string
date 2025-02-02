@@ -29,43 +29,55 @@ interface PostWithUser extends Post {
 
 export default function PostFeed() {
   const [posts, setPosts] = useState<PostWithUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   
-  // Setup intersection observer
-  const { ref, inView } = useInView();
+  const { ref, inView } = useInView({
+    threshold: 0.5,
+  });
 
-  const fetchPosts = async (pageNum: number) => {
+  const fetchPosts = useCallback(async (pageNum: number) => {
+    if (isLoading || !hasMore) return;
+    
     try {
+      setIsLoading(true);
       const response = await fetch(`/api/posts/user-posts?page=${pageNum}&limit=5`);
       if (!response.ok) {
         throw new Error('Failed to fetch posts');
       }
       const data = await response.json();
       
-      if (data.posts.length < 5) {
+      if (data.posts.length === 0 || data.posts.length < 5) {
         setHasMore(false);
       }
       
-      setPosts(prev => pageNum === 1 ? data.posts : [...prev, ...data.posts]);
+      setPosts(prev => [...prev, ...data.posts]);
     } catch (error) {
       console.error('Error fetching posts:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch posts');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isLoading, hasMore]);
 
+  // Initial load
   useEffect(() => {
     fetchPosts(1);
   }, []);
 
+  // Handle infinite scroll
   useEffect(() => {
-    if (inView && hasMore && !isLoading) {
+    if (inView && hasMore && !isLoading && page > 1) {
+      fetchPosts(page);
+    }
+  }, [inView, hasMore, isLoading, page, fetchPosts]);
+
+  // Handle page increment separately
+  useEffect(() => {
+    if (inView && hasMore && !isLoading && page === 1) {
       setPage(prev => prev + 1);
-      fetchPosts(page + 1);
     }
   }, [inView, hasMore, isLoading]);
 
@@ -107,11 +119,16 @@ export default function PostFeed() {
           />
         ))}
         
-        {/* Loading indicator */}
+        {/* Loading indicator and "No more posts" message */}
         <div ref={ref} className="py-4">
           {isLoading && (
             <div className="flex justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+            </div>
+          )}
+          {!hasMore && !isLoading && posts.length > 0 && (
+            <div className="text-center text-gray-500">
+              No more posts
             </div>
           )}
         </div>
