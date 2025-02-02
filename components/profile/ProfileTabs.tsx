@@ -10,6 +10,7 @@ import { useInView } from "react-intersection-observer";
 import PostComponent from "@/components/dashboard/FeedContent/Post";
 
 interface PostWithUser extends PrismaPost {
+  userId: string;
   user: {
     id: string;
     firstName: string;
@@ -201,6 +202,7 @@ function UserPostFeed({ userId }: { userId: string }) {
             content: post.content,
             imageUrl: post.imageUrl,
             createdAt: post.createdAt.toString(),
+            userId: post.userId,
             user: {
               id: post.user.id,
               firstName: post.user.firstName,

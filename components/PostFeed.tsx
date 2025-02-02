@@ -6,6 +6,7 @@ import PostComponent from '@/components/dashboard/FeedContent/Post';
 import { useInView } from 'react-intersection-observer';
 
 interface PostWithUser extends Post {
+  userId: string;
   user: {
     id: string;
     firstName: string;
@@ -108,6 +109,7 @@ export default function PostFeed() {
               content: post.content,
               imageUrl: post.imageUrl,
               createdAt: post.createdAt.toString(),
+              userId: post.userId,
               user: {
                 id: post.user.id,
                 firstName: post.user.firstName,

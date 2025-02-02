@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageCircle, UserCircle, CheckCircle2, XCircle } from "lucide-react";
+import { MessageCircle, UserCircle, CheckCircle2, XCircle, MoreHorizontal, Trash2 } from "lucide-react";
 import LinkUserAvatar from "@/components/LinkUserAvatar";
 import Comment from "./Comment";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -18,6 +18,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useAuth } from "@clerk/nextjs";
 
 interface PostProps {
   post: {
@@ -25,6 +36,7 @@ interface PostProps {
     content: string;
     imageUrl: string | null;
     createdAt: string;
+    userId: string;
     user: {
       id: string;
       firstName: string;
@@ -39,6 +51,8 @@ export default function Post({ post }: PostProps) {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const queryClient = useQueryClient();
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const { userId } = useAuth();
 
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ["comments", post.id],
@@ -123,6 +137,22 @@ export default function Post({ post }: PostProps) {
     },
   });
 
+  const deletePost = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/posts/${post.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete post");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      toast.success("Post deleted successfully");
+    },
+    onError: () => {
+      toast.error("Failed to delete post");
+    },
+  });
+
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -154,37 +184,58 @@ export default function Post({ post }: PostProps) {
               </p>
             </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className={cn(
-                  "h-8 w-8 p-0",
-                  authenticity?.userVote === true && "text-green-500",
-                  authenticity?.userVote === false && "text-red-500"
-                )}
-              >
-                <CheckCircle2 className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem
-                onClick={() => updateAuthenticity.mutate(true)}
-                className="text-green-500"
-              >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Authentic ({authenticity?.counts.authentic || 0})
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => updateAuthenticity.mutate(false)}
-                className="text-red-500"
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                Unauthentic ({authenticity?.counts.unauthentic || 0})
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center space-x-1">
+            {post.userId === userId && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => setShowDeleteAlert(true)}
+                    className="text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Post
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className={cn(
+                    "h-8 w-8 p-0",
+                    authenticity?.userVote === true && "text-green-500",
+                    authenticity?.userVote === false && "text-red-500"
+                  )}
+                >
+                  <CheckCircle2 className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem
+                  onClick={() => updateAuthenticity.mutate(true)}
+                  className="text-green-500"
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Authentic ({authenticity?.counts.authentic || 0})
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => updateAuthenticity.mutate(false)}
+                  className="text-red-500"
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Unauthentic ({authenticity?.counts.unauthentic || 0})
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -263,6 +314,26 @@ export default function Post({ post }: PostProps) {
           </div>
         )}
       </CardFooter>
+
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your post.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletePost.mutate()}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 } 
