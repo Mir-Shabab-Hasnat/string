@@ -9,11 +9,39 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get pagination parameters
+    // Get pagination parameters and userId
     const searchParams = req.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '5');
+    const userId = searchParams.get('userId');
     const skip = (page - 1) * limit;
+
+    // If userId is provided, fetch only that user's posts
+    if (userId) {
+      const posts = await prisma.post.findMany({
+        where: {
+          userId: userId,
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              profilePicture: true,
+              username: true,
+            },
+          },
+        },
+        skip,
+        take: limit,
+      });
+
+      return NextResponse.json({ posts });
+    }
 
     // Get user's preferences
     const preferences = await prisma.userFeedPreferences.findUnique({
