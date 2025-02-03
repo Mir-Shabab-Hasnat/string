@@ -135,10 +135,18 @@ function UserPostFeed({ userId }: { userId: string }) {
   });
 
   const fetchPosts = useCallback(async (pageNum: number) => {
-    if (isLoading && pageNum > 1) return;
+    // Use a ref to check loading state at call time
+    let shouldAbort = false;
     
     try {
-      setIsLoading(true);
+      // Check current loading state
+      setIsLoading(prev => {
+        shouldAbort = pageNum > 1 && prev;
+        return true;
+      });
+      
+      if (shouldAbort) return;
+      
       setError(null);
       
       const response = await fetch(`/api/users/${userId}/posts?page=${pageNum}&limit=5`);
@@ -167,21 +175,21 @@ function UserPostFeed({ userId }: { userId: string }) {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, userId]);
+  }, [userId]);
 
   useEffect(() => {
     setPosts([]);
     setPage(1);
     setHasMore(true);
     fetchPosts(1);
-  }, [userId]);
+  }, [userId, fetchPosts]);
 
   useEffect(() => {
     if (inView && hasMore && !isLoading) {
       setPage(prev => prev + 1);
       fetchPosts(page + 1);
     }
-  }, [inView, hasMore, isLoading]);
+  }, [inView, hasMore, isLoading, fetchPosts, page]);
 
   if (error) {
     return (

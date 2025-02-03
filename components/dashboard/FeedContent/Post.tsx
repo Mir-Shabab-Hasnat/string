@@ -66,18 +66,6 @@ export default function Post({ post }: PostProps) {
     enabled: true,
   });
 
-  const { data: authenticityData } = useQuery({
-    queryKey: ["authenticity", post.id],
-    queryFn: async () => {
-      const response = await fetch(`/api/posts/${post.id}/authenticity`);
-      if (!response.ok) throw new Error("Failed to fetch authenticity data");
-      const data = await response.json();
-      setVoteCounts(data.counts);
-      setAuthenticityVote(data.userVote);
-      return data;
-    },
-    enabled: true,
-  });
 
   const createComment = useMutation({
     mutationFn: async (content: string) => {
