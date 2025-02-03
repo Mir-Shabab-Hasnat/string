@@ -1,12 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/Badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Search, Filter, BookOpen, Video, FileText, Users, Star, TrendingUp, Sparkles, Clock, Award, ChevronRight } from "lucide-react"
+import { Search, BookOpen, Video, FileText, Users, Star, TrendingUp, Sparkles, Clock, Award, ChevronRight } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -14,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
@@ -400,8 +398,8 @@ export default function MarketplaceContent() {
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    "The course exceeded my expectations. The instructor was knowledgeable and 
-                    supportive, and the content was well-structured and practical."
+                    &ldquo;The course exceeded my expectations. The instructor was knowledgeable and 
+                    supportive, and the content was well-structured and practical.&rdquo;
                   </p>
                   <div className="flex items-center mt-4">
                     {Array(5).fill(null).map((_, i) => (

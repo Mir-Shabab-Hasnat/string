@@ -16,7 +16,7 @@ export async function DELETE(
     }
     const userId = user.id
     const post = await prisma.post.findUnique({
-      where: { id: params.postId },
+      where: { id: postId },
       select: { userId: true },
     });
 

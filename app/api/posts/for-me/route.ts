@@ -1,28 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import {  NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
 
-
-
-
-
-// Function to get post data include configuration
-function getPostDataInclude() {
-  return {
-    user: {
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        profilePicture: true,
-        username: true,
-      },
-    },
-  } as const;
-}
-
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const user = await currentUser();
     if (!user) {

@@ -1,8 +1,8 @@
 "use client";
 
-import { User, UserRole } from "@prisma/client";
+import { User } from "@prisma/client";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Edit, MessageSquare, MapPin, Calendar, Mail, BookOpen, Microscope, GraduationCap, Users, UserPlus, UserCheck, UserX } from "lucide-react";
@@ -15,10 +15,9 @@ import {
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/Badge"
-import { useState, useEffect } from "react";
+
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+
 import { FriendRequestButton } from "./FriendRequestButton";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -26,29 +25,6 @@ interface ProfileHeaderProps {
   user: User;
   isOwner: boolean;
 }
-
-// Temporary mock data for followers/following
-const mockConnections = [
-  {
-    id: "1",
-    firstName: "John",
-    lastName: "Doe",
-    username: "johndoe",
-    profilePicture: "/default-avatar.png",
-    role: "STUDENT",
-    organisation: "MIT"
-  },
-  {
-    id: "2",
-    firstName: "Jane",
-    lastName: "Smith",
-    username: "janesmith",
-    profilePicture: "/default-avatar.png",
-    role: "PROFESSIONAL",
-    organisation: "Google"
-  },
-  // Add more mock users as needed
-]
 
 type FriendStatus = {
   status: 'NONE' | 'PENDING' | 'ACCEPTED' | 'REJECTED';

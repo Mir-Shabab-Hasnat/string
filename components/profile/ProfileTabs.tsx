@@ -167,14 +167,14 @@ function UserPostFeed({ userId }: { userId: string }) {
     setPage(1);
     setHasMore(true);
     fetchPosts(1);
-  }, [userId]);
+  }, [userId, fetchPosts]);
 
   useEffect(() => {
     if (inView && hasMore && !isLoading) {
       setPage(prev => prev + 1);
       fetchPosts(page + 1);
     }
-  }, [inView, hasMore, isLoading]);
+  }, [inView, hasMore, isLoading, fetchPosts, page]);
 
   if (error) {
     return (

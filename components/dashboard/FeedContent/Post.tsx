@@ -91,7 +91,7 @@ export default function Post({ post }: PostProps) {
       const previousComments = queryClient.getQueryData(["comments", post.id]);
 
       // Optimistically add new comment
-      queryClient.setQueryData(["comments", post.id], (old: any) => [
+      queryClient.setQueryData(["comments", post.id], (old: Comment[] | undefined) => [
         {
           id: "temp-" + Date.now(),
           content: newCommentContent,
@@ -302,7 +302,17 @@ export default function Post({ post }: PostProps) {
                   Loading comments...
                 </div>
               ) : comments.length > 0 ? (
-                comments.map((comment: any) => (
+                comments.map((comment: {
+                  id: string;
+                  content: string;
+                  createdAt: string;
+                  user: {
+                    id: string;
+                    firstName: string;
+                    lastName: string;
+                    profilePicture: string | null;
+                  };
+                }) => (
                   <Comment key={comment.id} comment={comment} />
                 ))
               ) : (

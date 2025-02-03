@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Post } from '@prisma/client';
 import PostComponent from '@/components/dashboard/FeedContent/Post';
 import { useInView } from 'react-intersection-observer';
@@ -66,7 +66,7 @@ export default function PostFeed() {
   // Initial load
   useEffect(() => {
     fetchPosts(1);
-  }, []);
+  }, [fetchPosts]);
 
   // Handle infinite scroll
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function PostFeed() {
     if (inView && hasMore && !isLoading && page === 1) {
       setPage(prev => prev + 1);
     }
-  }, [inView, hasMore, isLoading]);
+  }, [inView, hasMore, isLoading, page]);
 
   if (error) {
     return (

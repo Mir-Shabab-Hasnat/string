@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -22,9 +21,6 @@ type Notification = {
   friendRequestStatus?: 'PENDING' | 'ACCEPTED' | 'REJECTED';
 };
 
-type FriendRequestStatus = {
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
-};
 
 export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -90,6 +86,7 @@ export function NotificationBell() {
 
       toast.success(`Friend request ${action}ed successfully!`);
     } catch (error) {
+      console.log(error)
       toast.error(`Failed to ${action} friend request`);
     }
   };
