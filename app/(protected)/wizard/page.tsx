@@ -3,6 +3,8 @@
 import { WizardForm } from "@/components/wizard/wizard-form"
 import { Card, CardContent } from "@/components/ui/card"
 
+export const dynamic = "force-dynamic";
+
 export default function WizardPage() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 md:p-8">
@@ -14,4 +16,6 @@ export default function WizardPage() {
     </div>
   )
 }
+
+
 
