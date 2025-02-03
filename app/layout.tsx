@@ -14,7 +14,7 @@ import { ourFileRouter } from "@/app/api/uploadthing/core";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Verse",
+  title: "String",
   description: "The next gen social media for the world of Academia!",
   openGraph: {
     images: ['/metadata.png']
