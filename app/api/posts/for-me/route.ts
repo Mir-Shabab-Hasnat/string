@@ -3,25 +3,9 @@ import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
-interface PostsPage {
-  posts: PostWithUser[];
-  nextCursor: string | null;
-}
 
-// Define the type for posts with included user data
-type PostWithUser = Prisma.PostGetPayload<{
-  include: {
-    user: {
-      select: {
-        id: true;
-        firstName: true;
-        lastName: true;
-        profilePicture: true;
-        username: true;
-      };
-    };
-  };
-}>;
+
+
 
 // Function to get post data include configuration
 function getPostDataInclude() {

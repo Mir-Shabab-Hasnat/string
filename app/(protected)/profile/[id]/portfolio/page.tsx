@@ -3,15 +3,10 @@ import { notFound } from "next/navigation"
 import prisma from "@/lib/prisma"
 import { 
   GraduationCap, 
-  
+
   Trophy, 
-  
-  
-  
-  
- 
+
   Rocket,
-  Star,
   Code,
   
   GraduationCap as Education
@@ -26,7 +21,7 @@ export const dynamic = "force-dynamic";
 
 type Section = {
   title: string;
-  icon: any;
+  icon: React.ElementType;
   items: Array<{
     category?: string;
     skills?: string[];
@@ -42,7 +37,7 @@ type Section = {
 
 type RoleConfig = {
   [key in 'STUDENT' | 'PROFESSIONAL' | 'ACADEMIC' | 'ADMIN']: {
-    icon: any;
+    icon: React.ElementType;
     color: string;
     sections: Section[];
   }

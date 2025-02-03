@@ -53,7 +53,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Search Results</h1>
         <p className="text-muted-foreground">
-          Showing results for "{query}" in {filter}s
+          Showing results for &quot;{query}&quot; in {filter}s
         </p>
       </div>
 
@@ -98,7 +98,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           ) : (
             <div className="text-center py-12">
               <p className="text-lg text-muted-foreground">
-                No results found for "{query}"
+                No results found for &quot;{query}&quot;
               </p>
               <p className="text-sm text-muted-foreground">
                 Try searching for something else
