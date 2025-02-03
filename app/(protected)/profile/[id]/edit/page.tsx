@@ -6,16 +6,17 @@ import EditProfileForm from "@/components/profile/EditProfileForm"
 export default async function EditProfilePage({
   params
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const {id} = await params
   const clerkUser = await currentUser()
   
-  if (!clerkUser || clerkUser.id !== params.id) {
+  if (!clerkUser || clerkUser.id !== id) {
     redirect("/")
   }
 
   const user = await prisma.user.findUnique({
-    where: { id: params.id }
+    where: { id: id }
   })
 
   if (!user) {

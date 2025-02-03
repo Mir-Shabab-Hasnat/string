@@ -7,7 +7,7 @@ import ProfileTabs from "@/components/profile/ProfileTabs"
 export default async function ProfilePage({
   params
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const {id} = await params
   const [profile, viewer] = await Promise.all([

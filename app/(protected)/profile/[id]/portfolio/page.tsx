@@ -46,11 +46,12 @@ type RoleConfig = {
 export default async function PortfolioPage({
   params
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const {id} = await params
   const [profile, viewer] = await Promise.all([
     prisma.user.findUnique({
-      where: { id: params.id }
+      where: { id: id }
     }),
     currentUser()
   ])
@@ -149,6 +150,8 @@ export default async function PortfolioPage({
                 src={profile.profilePicture || "/default-avatar.png"}
                 alt={`${profile.firstName}'s profile`}
                 fill
+                width={160}
+                height={160}
                 className="rounded-full object-cover border-4 border-white shadow-xl"
               />
             </div>

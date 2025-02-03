@@ -6,10 +6,10 @@ import { Card, CardHeader } from "@/components/ui/card"
 import Link from "next/link"
 
 interface SearchPageProps {
-  searchParams: {
-    q?: string
-    filter?: string
-  }
+  searchParams: Promise<{
+    q?: string;
+    filter?: string;
+  }>;
 }
 
 async function getSearchResults(query: string, filter: string) {
@@ -39,8 +39,8 @@ async function getSearchResults(query: string, filter: string) {
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const query = searchParams.q
-  const filter = searchParams.filter || "user"
+  const { q: query, filter: filterParam } = await searchParams;
+  const filter = filterParam || "user";
 
   if (!query) {
     notFound()

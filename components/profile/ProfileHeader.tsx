@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 import Image from "next/image";
 import Link from "next/link";
-import { Edit, MessageSquare, MapPin, Calendar, Mail, BookOpen, Microscope, GraduationCap, Users, UserPlus, UserCheck, UserX } from "lucide-react";
+import { Edit, MessageSquare, MapPin, Calendar, Mail, BookOpen, Microscope, GraduationCap } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,11 +26,6 @@ interface ProfileHeaderProps {
   isOwner: boolean;
 }
 
-type FriendStatus = {
-  status: 'NONE' | 'PENDING' | 'ACCEPTED' | 'REJECTED';
-  requestId: string | null;
-  isOutgoing: boolean;
-};
 
 interface Friend {
   id: string;
@@ -67,7 +62,7 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
 
   const RoleIcon = roleConfig[user.role].icon;
 
-  const { data: friendCount, isLoading, error } = useQuery({
+  const { data: friendCount } = useQuery({
     queryKey: ["friendCount", user.id],
     queryFn: async () => {
       const res = await fetch(`/api/user/${user.id}/friends/count`);
