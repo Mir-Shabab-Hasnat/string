@@ -3,17 +3,17 @@ import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
 export async function POST(
-  req: Request,
-  { params }: { params: { postId: string } }
+  request: Request,
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const {postId} = await params
+    const { postId } = await params;
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { isAuthentic } = await req.json();
+    const { isAuthentic } = await request.json();
 
     const authenticity = await prisma.postAuthenticity.upsert({
       where: {
@@ -60,11 +60,11 @@ export async function POST(
 }
 
 export async function GET(
-  req: Request,
-  { params }: { params: { postId: string } }
+  request: Request,
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const {postId} = await params
+    const { postId } = await params;
     const counts = await prisma.postAuthenticity.groupBy({
       by: ['isAuthentic'],
       where: {

@@ -2,29 +2,58 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await Promise.resolve(params);
+    const { id } = await params;
 
-    const friends = await prisma.user.findMany({
+    const friends = await prisma.friendRequest.findMany({
       where: {
         OR: [
-          { FriendRequest_FriendRequest_recipientIdToUser: { some: { senderId: id, status: "ACCEPTED" } } },
-          { FriendRequest_FriendRequest_senderIdToUser: { some: { recipientId: id, status: "ACCEPTED" } } },
+          { senderId: id },
+          { recipientId: id },
         ],
+        status: "ACCEPTED",
       },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        username: true,
-        profilePicture: true,
+      include: {
+        User_FriendRequest_senderIdToUser: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            profilePicture: true,
+            username: true,
+          },
+        },
+        User_FriendRequest_recipientIdToUser: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            profilePicture: true,
+            username: true,
+          },
+        },
       },
     });
 
-    return NextResponse.json(friends);
+    // Transform the data to get a clean friends list
+    const friendsList = friends.map(friend => {
+      const friendData = friend.senderId === id 
+        ? friend.User_FriendRequest_recipientIdToUser 
+        : friend.User_FriendRequest_senderIdToUser;
+      
+      return {
+        id: friendData.id,
+        firstName: friendData.firstName,
+        lastName: friendData.lastName,
+        profilePicture: friendData.profilePicture,
+        username: friendData.username,
+      };
+    });
+
+    return NextResponse.json(friendsList);
   } catch (error) {
     console.error("Error fetching friends:", error);
     return NextResponse.json(

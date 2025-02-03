@@ -3,11 +3,13 @@ import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
 export async function POST(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const user = await currentUser();
+    
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -15,7 +17,7 @@ export async function POST(
     // Update friend request status to ACCEPTED
     const friendRequest = await prisma.friendRequest.update({
       where: {
-        id: params.id,
+        id: id,
       },
       data: {
         status: "ACCEPTED",

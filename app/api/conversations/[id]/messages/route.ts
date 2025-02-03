@@ -3,11 +3,11 @@ import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const {id} = await params
+    const { id } = await params;
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -42,22 +42,23 @@ export async function GET(
 }
 
 export async function POST(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { content } = await req.json();
+    const { content } = await request.json();
 
     const message = await prisma.message.create({
       data: {
         content,
         senderId: user.id,
-        conversationId: params.id,
+        conversationId: id,
       },
       include: {
         sender: {
@@ -72,7 +73,7 @@ export async function POST(
 
     // Update conversation's updatedAt
     await prisma.conversation.update({
-      where: { id: params.id },
+      where: { id },
       data: { updatedAt: new Date() },
     });
 

@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
+  request: Request,
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
     const { postId } = await params;

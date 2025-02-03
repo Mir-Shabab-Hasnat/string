@@ -2,11 +2,11 @@ import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await Promise.resolve(params)
+    const { id } = await params
 
     const user = await prisma.user.findUnique({
       where: { id },
@@ -16,18 +16,24 @@ export async function GET(
         lastName: true,
         username: true,
         profilePicture: true,
-        organisation: true,
-        role: true,
+        
+        createdAt: true,
       }
     })
 
     if (!user) {
-      return new NextResponse("User not found", { status: 404 })
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      )
     }
 
     return NextResponse.json(user)
   } catch (error) {
     console.error("Error fetching user:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
   }
 } 

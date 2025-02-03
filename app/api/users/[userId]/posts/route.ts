@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const { searchParams } = new URL(request.url);
@@ -12,7 +12,7 @@ export async function GET(
     const limit = parseInt(searchParams.get("limit") || "5");
     const skip = (page - 1) * limit;
 
-    const {userId} = await params
+    const { userId } = await params;
     const posts = await prisma.post.findMany({
       where: {
         userId: userId,
