@@ -92,10 +92,14 @@ export default function ChatUI() {
 
   if (!user) return null;
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
     <div className="flex h-[calc(100vh-8rem)] overflow-hidden">
       {/* Conversations List */}
-      <Card className="w-[350px] border-r flex flex-col shrink-0 md:block hidden">
+      <Card className={`w-[350px] border-r flex flex-col shrink-0 ${
+        selectedConversation && isMobile ? 'hidden' : 'block'
+      } ${isMobile ? 'w-full' : 'md:block hidden'}`}>
         <div className="p-4 border-b">
           <h2 className="font-semibold">Messages</h2>
         </div>
@@ -136,9 +140,20 @@ export default function ChatUI() {
       </Card>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-background min-w-0">
+      <div className={`flex-1 flex flex-col bg-background min-w-0 ${
+        !selectedConversation && isMobile ? 'hidden' : 'block'
+      }`}>
         {selectedConversation ? (
           <>
+            {/* Add a back button for mobile */}
+            {isMobile && (
+              <button
+                onClick={() => setSelectedConversation(null)}
+                className="p-2 text-muted-foreground hover:text-foreground"
+              >
+                ← Back to conversations
+              </button>
+            )}
             <div className="border-b p-4">
               {conversations?.find(c => c.id === selectedConversation)?.participants[0] && (
                 <div className="flex items-center gap-3">
@@ -227,13 +242,12 @@ export default function ChatUI() {
               </form>
             </div>
           </>
-        ) : (
+        ) : !isMobile ? (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
             Select a conversation to start chatting
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
-  
 }
