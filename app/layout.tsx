@@ -16,6 +16,13 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Verse",
   description: "The next gen social media for the world of Academia!",
+  openGraph: {
+    images: ['/metadata.png']
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/metadata.png']
+  }
 };
 
 export default function RootLayout({
