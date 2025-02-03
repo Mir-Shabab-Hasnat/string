@@ -17,11 +17,11 @@ export const metadata: Metadata = {
   title: "String",
   description: "The next gen social media for the world of Academia!",
   openGraph: {
-    images: ['/metadata.png']
+    images: ['/metdata.png']
   },
   twitter: {
     card: 'summary_large_image',
-    images: ['/metadata.png']
+    images: ['/metdata.png']
   }
 };
 
