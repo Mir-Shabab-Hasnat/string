@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarDays, Mail, Building2, User as UserIcon } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import UserPostsFeed from '@/components/profile/UserPostsFeed';
 
 interface ProfileTabsProps {
   user: User;
@@ -90,8 +91,8 @@ export default function ProfileTabs({ user, isOwner }: ProfileTabsProps) {
           </TabsContent>
 
           <TabsContent value="posts">
-            <div className="min-h-[200px] flex items-center justify-center text-muted-foreground">
-              <p>No posts yet</p>
+            <div className="min-h-[200px]">
+              <UserPostsFeed userId={user.id} />
             </div>
           </TabsContent>
 

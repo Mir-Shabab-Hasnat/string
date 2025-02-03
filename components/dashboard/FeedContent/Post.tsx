@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageCircle, UserCircle, CheckCircle2, XCircle, MoreHorizontal, Trash2 } from "lucide-react";
+import { MessageCircle, UserCircle, MoreHorizontal, Trash2 } from "lucide-react";
 import LinkUserAvatar from "@/components/LinkUserAvatar";
 import Comment from "./Comment";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,7 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +28,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@clerk/nextjs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface PostProps {
   post: {
@@ -65,15 +63,6 @@ export default function Post({ post }: PostProps) {
     enabled: true,
   });
 
-  const { data: authenticity } = useQuery({
-    queryKey: ["post-authenticity", post.id],
-    queryFn: async () => {
-      const response = await fetch(`/api/posts/${post.id}/authenticity`);
-      if (!response.ok) throw new Error("Failed to fetch authenticity");
-      return response.json();
-    },
-  });
-
   const createComment = useMutation({
     mutationFn: async (content: string) => {
       const response = await fetch(`/api/posts/${post.id}/comments`, {
@@ -85,13 +74,9 @@ export default function Post({ post }: PostProps) {
       return response.json();
     },
     onMutate: async (newCommentContent) => {
-      // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: ["comments", post.id] });
-
-      // Get current comments
       const previousComments = queryClient.getQueryData(["comments", post.id]);
 
-      // Optimistically add new comment
       queryClient.setQueryData(["comments", post.id], (old: Comment[] | undefined) => [
         {
           id: "temp-" + Date.now(),
@@ -118,23 +103,6 @@ export default function Post({ post }: PostProps) {
     onSuccess: () => {
       setNewComment("");
       toast.success("Comment added successfully");
-    },
-  });
-
-  const updateAuthenticity = useMutation({
-    mutationFn: async (isAuthentic: boolean) => {
-      const response = await fetch(`/api/posts/${post.id}/authenticity`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isAuthentic }),
-      });
-      if (!response.ok) throw new Error("Failed to update authenticity");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["post-authenticity", post.id],
-      });
     },
   });
 
@@ -185,72 +153,37 @@ export default function Post({ post }: PostProps) {
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-1">
-            {post.userId === userId && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => setShowDeleteAlert(true)}
-                    className="text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Post
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            
+          {post.userId === userId && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className={cn(
-                    "h-8 w-8 p-0",
-                    authenticity?.userVote === true && "text-green-500",
-                    authenticity?.userVote === false && "text-red-500"
-                  )}
-                >
-                  <CheckCircle2 className="h-5 w-5" />
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onClick={() => updateAuthenticity.mutate(true)}
-                  className="text-green-500"
+                  onClick={() => setShowDeleteAlert(true)}
+                  className="text-red-600"
                 >
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                  Authentic ({authenticity?.counts.authentic || 0})
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => updateAuthenticity.mutate(false)}
-                  className="text-red-500"
-                >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  Unauthentic ({authenticity?.counts.unauthentic || 0})
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Post
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm">{post.content}</p>
         {post.imageUrl && (
           <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-            <Avatar className="w-full h-full">
-              <AvatarImage
+            <Image
                 src={post.imageUrl}
-                alt="Post image" 
-                className="object-cover"
-              />
-              <AvatarFallback>P</AvatarFallback>
-            </Avatar>
+                alt="Post image"
+                width={500}
+                height={500}
+                className="w-full h-full object-cover"
+            />
           </div>
         )}
         {post.tags && post.tags.length > 0 && (

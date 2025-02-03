@@ -1,40 +1,52 @@
-
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 
 export async function DELETE(
-  req: Request,
+  request: NextRequest,
   { params }: { params: { postId: string } }
 ) {
-    const {postId} = await params
   try {
-    const  user = await currentUser();
-    
+    const { postId } = await params;
+    const user = await currentUser();
+
     if (!user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const userId = user.id
+
+    const userId = user.id;
+
+    // Get the post to verify ownership
     const post = await prisma.post.findUnique({
       where: { id: postId },
       select: { userId: true },
     });
 
     if (!post) {
-      return new NextResponse("Post not found", { status: 404 });
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
+    // Verify post ownership
     if (post.userId !== userId) {
-      return new NextResponse("Unauthorized", { status: 403 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    await prisma.post.delete({
-      where: { id: params.postId },
+    // Delete all comments first (due to foreign key constraints)
+    await prisma.comment.deleteMany({
+      where: { postId: postId },
     });
 
-    return new NextResponse(null, { status: 204 });
+    // Delete the post
+    await prisma.post.delete({
+      where: { id: postId },
+    });
+
+    return NextResponse.json({ message: "Post deleted successfully" });
   } catch (error) {
     console.error("Error deleting post:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete post" },
+      { status: 500 }
+    );
   }
-} 
+}

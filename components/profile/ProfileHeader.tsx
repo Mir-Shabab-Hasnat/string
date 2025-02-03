@@ -3,7 +3,7 @@
 import { User } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 
-import Image from "next/image";
+
 import Link from "next/link";
 import { Edit, MessageSquare, MapPin, Calendar, Mail, BookOpen, Microscope, GraduationCap } from "lucide-react";
 import {
@@ -115,17 +115,14 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
           <div className="flex flex-col items-center lg:items-start gap-6">
             {/* Avatar Container with Border */}
             <div className="relative group">
-              {/* Profile Picture */}
-              <div className="relative w-40 h-40 rounded-full overflow-hidden ring-4 ring-background shadow-xl">
-                <Avatar className="w-40 h-40">
-                  <AvatarImage
-                    src={user.profilePicture || "/default-avatar.png"}
-                    alt={`${user.firstName}'s profile`}
-                    className="object-cover"
-                  />
-                  <AvatarFallback>{user.firstName?.[0] || "U"}</AvatarFallback>
-                </Avatar>
-              </div>
+              <Avatar className="w-40 h-40 ring-4 ring-background shadow-xl">
+                <AvatarImage
+                  src={user.profilePicture || "/default-avatar.png"}
+                  alt={`${user.firstName}'s profile`}
+                  className="object-cover w-full h-full"
+                />
+                <AvatarFallback>{user.firstName?.[0] || "U"}</AvatarFallback>
+              </Avatar>
               
               {/* Status Indicator - Optional */}
               <div className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 rounded-full ring-4 ring-background" />
