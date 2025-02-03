@@ -24,6 +24,30 @@ import Image from "next/image"
 
 export const dynamic = "force-dynamic";
 
+type Section = {
+  title: string;
+  icon: any;
+  items: Array<{
+    category?: string;
+    skills?: string[];
+    title?: string;
+    description?: string;
+    date?: string;
+    tags?: string[];
+    school?: string;
+    degree?: string;
+    gpa?: string;
+  }>;
+}
+
+type RoleConfig = {
+  [key in 'STUDENT' | 'PROFESSIONAL' | 'ACADEMIC' | 'ADMIN']: {
+    icon: any;
+    color: string;
+    sections: Section[];
+  }
+}
+
 export default async function PortfolioPage({
   params
 }: {
@@ -42,7 +66,7 @@ export default async function PortfolioPage({
 
   const isOwner = viewer?.id === profile.id
 
-  const roleConfig = {
+  const roleConfig: RoleConfig = {
     STUDENT: {
       icon: GraduationCap,
       color: "bg-blue-500",
@@ -97,11 +121,26 @@ export default async function PortfolioPage({
           ]
         }
       ]
+    },
+    PROFESSIONAL: {
+      icon: GraduationCap,
+      color: "bg-blue-500",
+      sections: []
+    },
+    ACADEMIC: {
+      icon: GraduationCap,
+      color: "bg-blue-500",
+      sections: []
+    },
+    ADMIN: {
+      icon: GraduationCap,
+      color: "bg-blue-500",
+      sections: []
     }
   }
 
   const config = roleConfig[profile.role] || roleConfig.STUDENT
-  const RoleIcon = config.icon
+  
 
   return (
     <div className="min-h-screen bg-background">
@@ -162,7 +201,7 @@ export default async function PortfolioPage({
                     <div key={index}>
                       <h3 className="font-medium text-foreground mb-2">{item.category}</h3>
                       <div className="flex flex-wrap gap-2">
-                        {item.skills.map((skill, i) => (
+                        {item.skills?.map((skill, i) => (
                           <Badge key={i} variant="secondary">
                             {skill}
                           </Badge>
@@ -214,7 +253,7 @@ export default async function PortfolioPage({
                     <p className="text-muted-foreground mt-1">{item.description}</p>
                     <div className="flex justify-between items-center mt-2">
                       <div className="flex gap-2">
-                        {item.tags.map((tag, i) => (
+                        {item.tags?.map((tag, i) => (
                           <Badge key={i} variant="outline">{tag}</Badge>
                         ))}
                       </div>
