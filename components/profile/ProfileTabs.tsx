@@ -1,11 +1,25 @@
 "use client";
 
-import { User } from "@prisma/client";
+import { User, Post as PrismaPost } from "@prisma/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarDays, Mail, Building2, User as UserIcon } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import UserPostsFeed from '@/components/profile/UserPostsFeed';
+import { useState, useCallback, useEffect } from "react";
+import { useInView } from "react-intersection-observer";
+import PostComponent from "@/components/dashboard/FeedContent/Post";
+
+interface PostWithUser extends PrismaPost {
+  userId: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    profilePicture: string | null;
+    username: string;
+  };
+  tags: string[];
+}
 
 interface ProfileTabsProps {
   user: User;
@@ -90,9 +104,9 @@ export default function ProfileTabs({ user, isOwner }: ProfileTabsProps) {
             </div>
           </TabsContent>
 
-          <TabsContent value="posts">
+          <TabsContent value="posts" className="mt-6">
             <div className="min-h-[200px]">
-              <UserPostsFeed userId={user.id} />
+              <UserPostFeed userId={user.id} />
             </div>
           </TabsContent>
 
@@ -106,5 +120,119 @@ export default function ProfileTabs({ user, isOwner }: ProfileTabsProps) {
         </Tabs>
       </CardContent>
     </Card>
+  );
+}
+
+function UserPostFeed({ userId }: { userId: string }) {
+  const [posts, setPosts] = useState<PostWithUser[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  
+  const { ref, inView } = useInView({
+    threshold: 0.5,
+  });
+
+  const fetchPosts = useCallback(async (pageNum: number) => {
+    if (isLoading && pageNum > 1) return;
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await fetch(`/api/users/${userId}/posts?page=${pageNum}&limit=5`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch posts');
+      }
+      
+      const data = await response.json();
+      
+      if (data.posts.length === 0 || data.posts.length < 5) {
+        setHasMore(false);
+      }
+      
+      setPosts(prev => {
+        if (pageNum === 1) return data.posts;
+        const existingIds = new Set(prev.map((p: PostWithUser) => p.id));
+        const newPosts = data.posts.filter((p: PostWithUser) => !existingIds.has(p.id));
+        return [...prev, ...newPosts];
+      });
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch posts');
+      setHasMore(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, userId]);
+
+  useEffect(() => {
+    setPosts([]);
+    setPage(1);
+    setHasMore(true);
+    fetchPosts(1);
+  }, [userId]);
+
+  useEffect(() => {
+    if (inView && hasMore && !isLoading) {
+      setPage(prev => prev + 1);
+      fetchPosts(page + 1);
+    }
+  }, [inView, hasMore, isLoading]);
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 py-4">
+        {error}
+      </div>
+    );
+  }
+
+  if (posts.length === 0 && !isLoading) {
+    return (
+      <div className="text-center text-gray-500 py-4">
+        No posts found
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {posts.map((post) => (
+        <PostComponent
+          key={post.id}
+          post={{
+            id: post.id,
+            content: post.content,
+            imageUrl: post.imageUrl,
+            createdAt: post.createdAt.toString(),
+            userId: post.userId,
+            user: {
+              id: post.user.id,
+              firstName: post.user.firstName,
+              lastName: post.user.lastName,
+              profilePicture: post.user.profilePicture,
+            },
+            tags: post.tags || [],
+          }}
+        />
+      ))}
+      
+      <div ref={ref} className="py-4">
+        {isLoading && (
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+          </div>
+        )}
+        {!hasMore && !isLoading && posts.length > 0 && (
+          <div className="text-center text-gray-500">
+            No more posts
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
