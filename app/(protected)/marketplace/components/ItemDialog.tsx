@@ -10,8 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, MessageCircle, ShoppingCart } from "lucide-react";
-import { useRouter } from 'next/navigation';
+import { MapPin, ShoppingCart } from "lucide-react";
 
 interface ItemDialogProps {
   item: {
@@ -34,8 +33,6 @@ interface ItemDialogProps {
 }
 
 export function ItemDialog({ item, open, onOpenChange, onAddToCart }: ItemDialogProps) {
-  const router = useRouter();
-  
   if (!item) return null;
 
   

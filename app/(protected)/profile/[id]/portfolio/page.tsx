@@ -1,21 +1,19 @@
 import { currentUser } from "@clerk/nextjs/server"
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import prisma from "@/lib/prisma"
 import { 
   GraduationCap, 
-  Book, 
+  
   Trophy, 
-  Link as LinkIcon, 
-  FileText, 
-  Users2,
-  Building2,
-  Microscope,
-  BookOpen,
+  
+  
+  
+  
+ 
   Rocket,
   Star,
   Code,
-  Award,
-  Briefcase,
+  
   GraduationCap as Education
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
