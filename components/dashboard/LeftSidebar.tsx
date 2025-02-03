@@ -6,7 +6,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "../ui/button"
 import React from "react"
-import Image from "next/image"
+
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 
 interface NavItem {

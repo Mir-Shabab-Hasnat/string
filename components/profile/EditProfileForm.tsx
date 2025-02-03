@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { User } from "@prisma/client";
 import { UploadButton } from "@/components/ui/uploadthing";
-import Image from "next/image";
+
 import { useState } from "react";
 import { updateProfileSchema } from "@/schemas/user.schema";
 import { z } from "zod";

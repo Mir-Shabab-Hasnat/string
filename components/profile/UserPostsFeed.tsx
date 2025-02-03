@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Post } from '@prisma/client';
 import PostComponent from '@/components/dashboard/FeedContent/Post';
 import { useInView } from 'react-intersection-observer';
@@ -41,7 +41,7 @@ export default function UserPostsFeed({ userId }: UserPostsFeedProps) {
   
   const { ref, inView } = useInView();
 
-  const fetchPosts = async (pageNum: number) => {
+  const fetchPosts = useCallback(async (pageNum: number) => {
     if (isFetching || !hasMore) return;
     
     setIsFetching(true);
@@ -62,6 +62,7 @@ export default function UserPostsFeed({ userId }: UserPostsFeedProps) {
         );
         return [...prev, ...newPosts];
       });
+      setPage(pageNum + 1);
     } catch (error) {
       console.error('Error fetching posts:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch posts');
@@ -69,21 +70,20 @@ export default function UserPostsFeed({ userId }: UserPostsFeedProps) {
       setIsLoading(false);
       setIsFetching(false);
     }
-  };
+  }, [hasMore, isFetching, userId]);
 
   useEffect(() => {
     setPage(1);
     setPosts([]);
     setHasMore(true);
     fetchPosts(1);
-  }, [userId]);
+  }, [userId, fetchPosts]);
 
   useEffect(() => {
     if (inView && hasMore && !isLoading && !isFetching) {
-      setPage(prev => prev + 1);
-      fetchPosts(page + 1);
+      fetchPosts(page);
     }
-  }, [inView, hasMore, isLoading, isFetching]);
+  }, [inView, hasMore, isLoading, isFetching, fetchPosts, page]);
 
   if (error) {
     return (

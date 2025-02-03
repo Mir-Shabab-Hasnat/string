@@ -40,7 +40,7 @@ import { tags } from "@/lib/constants/tags";
 import LinkUserAvatar from "@/components/LinkUserAvatar";
 import { createPostSchema, type CreatePostData } from "@/schemas/post.schema";
 import { UploadButton } from "@/components/ui/uploadthing";
-import Image from "next/image";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const CreatePost = () => {
