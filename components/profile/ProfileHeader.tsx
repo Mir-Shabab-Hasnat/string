@@ -209,13 +209,15 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
                                 {friend.firstName} {friend.lastName}
                               </p>
                             </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => removeFriend(friend.id)}
-                            >
-                              Remove
-                            </Button>
+                            {isOwner && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => removeFriend(friend.id)}
+                              >
+                                Remove
+                              </Button>
+                            )}
                           </div>
                         ))}
                       </div>
