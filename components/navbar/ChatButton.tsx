@@ -22,8 +22,7 @@ export function ChatButton() {
       </SheetTrigger>
       <SheetContent 
         side="right" 
-        className="w-full p-0"
-        style={{ maxWidth: '100vw' }}
+        className="w-full p-0 md:max-w-[500px]"
       >
         <SheetHeader className="p-4 border-b">
           <SheetTitle>Messages</SheetTitle>
@@ -35,3 +34,4 @@ export function ChatButton() {
     </Sheet>
   );
 } 
+
