@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Post } from '@prisma/client';
 import PostComponent from '@/components/dashboard/FeedContent/Post';
 import { useInView } from 'react-intersection-observer';
 
 interface PostWithUser extends Post {
-  userId: string;
   user: {
     id: string;
     firstName: string;
@@ -30,20 +29,20 @@ interface PostWithUser extends Post {
 
 export default function PostFeed() {
   const [posts, setPosts] = useState<PostWithUser[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [isFetching, setIsFetching] = useState(false);
   
-  const { ref, inView } = useInView({
-    threshold: 0.5,
-  });
+  // Setup intersection observer
+  const { ref, inView } = useInView();
 
-  const fetchPosts = useCallback(async (pageNum: number) => {
-    if (isLoading || !hasMore) return;
+  const fetchPosts = async (pageNum: number) => {
+    if (isFetching || !hasMore) return;
     
+    setIsFetching(true);
     try {
-      setIsLoading(true);
       const response = await fetch(`/api/posts/user-posts?page=${pageNum}&limit=5`);
       if (!response.ok) {
         throw new Error('Failed to fetch posts');
@@ -54,33 +53,31 @@ export default function PostFeed() {
         setHasMore(false);
       }
       
-      setPosts(prev => [...prev, ...data.posts]);
+      setPosts(prev => {
+        const newPosts = data.posts.filter(
+          (newPost: PostWithUser) => !prev.some(existingPost => existingPost.id === newPost.id)
+        );
+        return [...prev, ...newPosts];
+      });
     } catch (error) {
       console.error('Error fetching posts:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch posts');
     } finally {
       setIsLoading(false);
+      setIsFetching(false);
     }
-  }, [isLoading, hasMore]);
+  };
 
-  // Initial load
   useEffect(() => {
     fetchPosts(1);
-  }, [fetchPosts]);
+  }, []);
 
-  // Handle infinite scroll
   useEffect(() => {
-    if (inView && hasMore && !isLoading && page > 1) {
-      fetchPosts(page);
-    }
-  }, [inView, hasMore, isLoading, page, fetchPosts]);
-
-  // Handle page increment separately
-  useEffect(() => {
-    if (inView && hasMore && !isLoading && page === 1) {
+    if (inView && hasMore && !isLoading && !isFetching) {
       setPage(prev => prev + 1);
+      fetchPosts(page + 1);
     }
-  }, [inView, hasMore, isLoading, page]);
+  }, [inView, hasMore, isLoading, isFetching]);
 
   if (error) {
     return (
@@ -121,16 +118,16 @@ export default function PostFeed() {
           />
         ))}
         
-        {/* Loading indicator and "No more posts" message */}
+        {/* Loading indicator */}
         <div ref={ref} className="py-4">
           {isLoading && (
             <div className="flex justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
             </div>
           )}
-          {!hasMore && !isLoading && posts.length > 0 && (
+          {!hasMore && posts.length > 0 && (
             <div className="text-center text-gray-500">
-              No more posts
+              No more posts to load
             </div>
           )}
         </div>

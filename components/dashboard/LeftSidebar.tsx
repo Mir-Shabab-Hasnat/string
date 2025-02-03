@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation"
 import { Button } from "../ui/button"
 import React from "react"
 import Image from "next/image"
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 
 interface NavItem {
   label: string
@@ -62,11 +63,14 @@ export default function LeftSidebar() {
       {/* User Profile Section */}
       <div className="flex flex-col items-center space-y-4 pb-6 border-b">
         <div className="w-20 h-20 rounded-full overflow-hidden">
-          <Image
-            src={userProfile?.profilePicture || '/default-avatar.png'}
-            alt="Profile"
-            className="w-full h-full object-cover"
-          />
+          <Avatar className="w-20 h-20">
+            <AvatarImage
+              src={userProfile?.profilePicture || '/default-avatar.png'} 
+              alt={`${userProfile?.firstName || 'User'}'s profile`}
+              className="object-cover"
+            />
+            <AvatarFallback>{userProfile?.firstName?.[0] || "U"}</AvatarFallback>
+          </Avatar>
         </div>
         <div className="text-center">
           <h2 className="font-semibold text-lg">

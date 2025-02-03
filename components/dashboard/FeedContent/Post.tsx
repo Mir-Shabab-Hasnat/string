@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@clerk/nextjs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface PostProps {
   post: {
@@ -242,13 +243,14 @@ export default function Post({ post }: PostProps) {
         <p className="text-sm">{post.content}</p>
         {post.imageUrl && (
           <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-            <Image
-              src={post.imageUrl}
-              alt="Post image"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
+            <Avatar className="w-full h-full">
+              <AvatarImage
+                src={post.imageUrl}
+                alt="Post image" 
+                className="object-cover"
+              />
+              <AvatarFallback>P</AvatarFallback>
+            </Avatar>
           </div>
         )}
         {post.tags && post.tags.length > 0 && (

@@ -11,7 +11,7 @@ export function Hero() {
       <div className="relative flex flex-col w-full py-5 mx-auto md:flex-row md:items-center md:justify-between">
         <div className="flex flex-row items-center justify-between text-sm lg:justify-start">
           <div className="flex items-center gap-2">
-            <Logo />
+            <Logo size={3} />
           </div>
           <div className="md:hidden">
             <ThemeToggle />

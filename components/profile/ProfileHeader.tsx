@@ -117,14 +117,14 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
             <div className="relative group">
               {/* Profile Picture */}
               <div className="relative w-40 h-40 rounded-full overflow-hidden ring-4 ring-background shadow-xl">
-                <Image
-                  src={user.profilePicture || "/default-avatar.png"}
-                  alt={`${user.firstName}'s profile picture`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  priority
-                />
+                <Avatar className="w-40 h-40">
+                  <AvatarImage
+                    src={user.profilePicture || "/default-avatar.png"}
+                    alt={`${user.firstName}'s profile`}
+                    className="object-cover"
+                  />
+                  <AvatarFallback>{user.firstName?.[0] || "U"}</AvatarFallback>
+                </Avatar>
               </div>
               
               {/* Status Indicator - Optional */}

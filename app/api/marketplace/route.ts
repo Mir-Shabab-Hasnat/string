@@ -122,7 +122,7 @@ export async function GET(request: Request) {
       ...item,
       seller: {
         name: `${item.seller?.firstName} ${item.seller?.lastName}`,
-        image: item.seller?.profilePicture || '/default-avatar.png'
+        image: item.seller?.profilePicture
       }
     }));
 
