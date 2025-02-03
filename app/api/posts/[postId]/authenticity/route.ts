@@ -32,6 +32,8 @@ export async function POST(
       },
     });
 
+    
+
     // Get updated counts
     const counts = await prisma.postAuthenticity.groupBy({
       by: ['isAuthentic'],
