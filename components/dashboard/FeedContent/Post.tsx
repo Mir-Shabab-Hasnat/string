@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageCircle, UserCircle, CheckCircle2, XCircle } from "lucide-react";
+import { MessageCircle, UserCircle, MoreHorizontal, Trash2, Check, X } from "lucide-react";
 import LinkUserAvatar from "@/components/LinkUserAvatar";
 import Comment from "./Comment";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,6 +17,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useAuth } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 
 interface PostProps {
@@ -25,6 +36,7 @@ interface PostProps {
     content: string;
     imageUrl: string | null;
     createdAt: string;
+    userId: string;
     user: {
       id: string;
       firstName: string;
@@ -39,6 +51,10 @@ export default function Post({ post }: PostProps) {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const queryClient = useQueryClient();
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const { userId } = useAuth();
+  const [authenticityVote, setAuthenticityVote] = useState<boolean | null>(null);
+  const [voteCounts, setVoteCounts] = useState({ authentic: 0, unauthentic: 0 });
 
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ["comments", post.id],
@@ -50,14 +66,6 @@ export default function Post({ post }: PostProps) {
     enabled: true,
   });
 
-  const { data: authenticity } = useQuery({
-    queryKey: ["post-authenticity", post.id],
-    queryFn: async () => {
-      const response = await fetch(`/api/posts/${post.id}/authenticity`);
-      if (!response.ok) throw new Error("Failed to fetch authenticity");
-      return response.json();
-    },
-  });
 
   const createComment = useMutation({
     mutationFn: async (content: string) => {
@@ -70,14 +78,10 @@ export default function Post({ post }: PostProps) {
       return response.json();
     },
     onMutate: async (newCommentContent) => {
-      // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: ["comments", post.id] });
-
-      // Get current comments
       const previousComments = queryClient.getQueryData(["comments", post.id]);
 
-      // Optimistically add new comment
-      queryClient.setQueryData(["comments", post.id], (old: any) => [
+      queryClient.setQueryData(["comments", post.id], (old: Comment[] | undefined) => [
         {
           id: "temp-" + Date.now(),
           content: newCommentContent,
@@ -106,20 +110,39 @@ export default function Post({ post }: PostProps) {
     },
   });
 
-  const updateAuthenticity = useMutation({
+  const deletePost = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/posts/${post.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete post");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      toast.success("Post deleted successfully");
+    },
+    onError: () => {
+      toast.error("Failed to delete post");
+    },
+  });
+
+  const voteAuthenticity = useMutation({
     mutationFn: async (isAuthentic: boolean) => {
       const response = await fetch(`/api/posts/${post.id}/authenticity`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isAuthentic }),
       });
-      if (!response.ok) throw new Error("Failed to update authenticity");
+      if (!response.ok) throw new Error("Failed to vote");
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["post-authenticity", post.id],
-      });
+    onSuccess: (data) => {
+      setVoteCounts(data.counts);
+      setAuthenticityVote(data.authenticity.isAuthentic);
+      toast.success("Vote recorded successfully");
+    },
+    onError: () => {
+      toast.error("Failed to record vote");
     },
   });
 
@@ -154,37 +177,24 @@ export default function Post({ post }: PostProps) {
               </p>
             </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className={cn(
-                  "h-8 w-8 p-0",
-                  authenticity?.userVote === true && "text-green-500",
-                  authenticity?.userVote === false && "text-red-500"
-                )}
-              >
-                <CheckCircle2 className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem
-                onClick={() => updateAuthenticity.mutate(true)}
-                className="text-green-500"
-              >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Authentic ({authenticity?.counts.authentic || 0})
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => updateAuthenticity.mutate(false)}
-                className="text-red-500"
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                Unauthentic ({authenticity?.counts.unauthentic || 0})
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {post.userId === userId && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteAlert(true)}
+                  className="text-red-600"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Post
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -192,11 +202,11 @@ export default function Post({ post }: PostProps) {
         {post.imageUrl && (
           <div className="relative aspect-video w-full overflow-hidden rounded-lg">
             <Image
-              src={post.imageUrl}
-              alt="Post image"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                src={post.imageUrl}
+                alt="Post image"
+                width={500}
+                height={500}
+                className="w-full h-full object-cover"
             />
           </div>
         )}
@@ -214,7 +224,47 @@ export default function Post({ post }: PostProps) {
         )}
       </CardContent>
       <CardFooter className="flex flex-col">
-        <div className="w-full">
+        <div className="w-full flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "text-muted-foreground",
+                  authenticityVote !== null && (
+                    authenticityVote
+                      ? "text-green-600"
+                      : "text-red-600"
+                  )
+                )}
+              >
+                {authenticityVote === true && <Check className="h-4 w-4 mr-2" />}
+                {authenticityVote === false && <X className="h-4 w-4 mr-2" />}
+                Authenticity
+                {(voteCounts.authentic > 0 || voteCounts.unauthentic > 0) && 
+                  ` (${voteCounts.authentic}/${voteCounts.unauthentic})`
+                }
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem
+                onClick={() => voteAuthenticity.mutate(true)}
+                className="text-green-600"
+              >
+                <Check className="h-4 w-4 mr-2" />
+                Authentic ({voteCounts.authentic})
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => voteAuthenticity.mutate(false)}
+                className="text-red-600"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Unauthentic ({voteCounts.unauthentic})
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button
             variant="ghost"
             size="sm"
@@ -251,7 +301,17 @@ export default function Post({ post }: PostProps) {
                   Loading comments...
                 </div>
               ) : comments.length > 0 ? (
-                comments.map((comment: any) => (
+                comments.map((comment: {
+                  id: string;
+                  content: string;
+                  createdAt: string;
+                  user: {
+                    id: string;
+                    firstName: string;
+                    lastName: string;
+                    profilePicture: string | null;
+                  };
+                }) => (
                   <Comment key={comment.id} comment={comment} />
                 ))
               ) : (
@@ -263,6 +323,26 @@ export default function Post({ post }: PostProps) {
           </div>
         )}
       </CardFooter>
+
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your post.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletePost.mutate()}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 } 

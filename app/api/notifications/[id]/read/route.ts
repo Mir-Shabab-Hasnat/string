@@ -3,18 +3,20 @@ import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const user = await currentUser();
-    if (!user) {
+
+    if (!user || user.id !== id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const notification = await prisma.notification.update({
       where: {
-        id: params.id,
+        id: id,
         userId: user.id,
       },
       data: {

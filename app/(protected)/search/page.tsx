@@ -6,10 +6,10 @@ import { Card, CardHeader } from "@/components/ui/card"
 import Link from "next/link"
 
 interface SearchPageProps {
-  searchParams: {
-    q?: string
-    filter?: string
-  }
+  searchParams: Promise<{
+    q?: string;
+    filter?: string;
+  }>;
 }
 
 async function getSearchResults(query: string, filter: string) {
@@ -39,8 +39,8 @@ async function getSearchResults(query: string, filter: string) {
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const query = searchParams.q
-  const filter = searchParams.filter || "user"
+  const { q: query, filter: filterParam } = await searchParams;
+  const filter = filterParam || "user";
 
   if (!query) {
     notFound()
@@ -53,7 +53,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Search Results</h1>
         <p className="text-muted-foreground">
-          Showing results for "{query}" in {filter}s
+          Showing results for &quot;{query}&quot; in {filter}s
         </p>
       </div>
 
@@ -98,7 +98,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           ) : (
             <div className="text-center py-12">
               <p className="text-lg text-muted-foreground">
-                No results found for "{query}"
+                No results found for &quot;{query}&quot;
               </p>
               <p className="text-sm text-muted-foreground">
                 Try searching for something else

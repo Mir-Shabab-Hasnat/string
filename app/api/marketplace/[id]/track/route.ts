@@ -3,12 +3,11 @@ import prisma from "@/lib/prisma";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const body = await request.json();
-    const { type } = body;
     const { id } = await params;
+    const { type } = await request.json();
 
     if (!type || !['view', 'click'].includes(type)) {
       return NextResponse.json({ error: "Invalid tracking type" }, { status: 400 });

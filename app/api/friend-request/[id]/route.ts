@@ -3,17 +3,18 @@ import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    const requestId = id;
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { action } = await req.json();
-    const requestId = params.id;
+    const { action } = await request.json();
 
     const friendRequest = await prisma.friendRequest.findUnique({
       where: { id: requestId },

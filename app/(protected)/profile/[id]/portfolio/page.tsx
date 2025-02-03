@@ -1,21 +1,14 @@
 import { currentUser } from "@clerk/nextjs/server"
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import prisma from "@/lib/prisma"
 import { 
   GraduationCap, 
-  Book, 
+
   Trophy, 
-  Link as LinkIcon, 
-  FileText, 
-  Users2,
-  Building2,
-  Microscope,
-  BookOpen,
+
   Rocket,
-  Star,
   Code,
-  Award,
-  Briefcase,
+  
   GraduationCap as Education
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -26,14 +19,39 @@ import Image from "next/image"
 
 export const dynamic = "force-dynamic";
 
+type Section = {
+  title: string;
+  icon: React.ElementType;
+  items: Array<{
+    category?: string;
+    skills?: string[];
+    title?: string;
+    description?: string;
+    date?: string;
+    tags?: string[];
+    school?: string;
+    degree?: string;
+    gpa?: string;
+  }>;
+}
+
+type RoleConfig = {
+  [key in 'STUDENT' | 'PROFESSIONAL' | 'ACADEMIC' | 'ADMIN']: {
+    icon: React.ElementType;
+    color: string;
+    sections: Section[];
+  }
+}
+
 export default async function PortfolioPage({
   params
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const {id} = await params
   const [profile, viewer] = await Promise.all([
     prisma.user.findUnique({
-      where: { id: params.id }
+      where: { id: id }
     }),
     currentUser()
   ])
@@ -44,7 +62,7 @@ export default async function PortfolioPage({
 
   const isOwner = viewer?.id === profile.id
 
-  const roleConfig = {
+  const roleConfig: RoleConfig = {
     STUDENT: {
       icon: GraduationCap,
       color: "bg-blue-500",
@@ -99,11 +117,26 @@ export default async function PortfolioPage({
           ]
         }
       ]
+    },
+    PROFESSIONAL: {
+      icon: GraduationCap,
+      color: "bg-blue-500",
+      sections: []
+    },
+    ACADEMIC: {
+      icon: GraduationCap,
+      color: "bg-blue-500",
+      sections: []
+    },
+    ADMIN: {
+      icon: GraduationCap,
+      color: "bg-blue-500",
+      sections: []
     }
   }
 
   const config = roleConfig[profile.role] || roleConfig.STUDENT
-  const RoleIcon = config.icon
+  
 
   return (
     <div className="min-h-screen bg-background">
@@ -112,14 +145,14 @@ export default async function PortfolioPage({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="flex flex-col md:flex-row items-center gap-8">
             {/* Profile Image */}
-            <div className="relative w-40 h-40">
-              <Image
+            <Image
                 src={profile.profilePicture || "/default-avatar.png"}
                 alt={`${profile.firstName}'s profile`}
-                fill
+                
+                width={400}
+                height={400}
                 className="rounded-full object-cover border-4 border-white shadow-xl"
               />
-            </div>
             
             {/* Profile Info */}
             <div className="text-center md:text-left text-white">
@@ -164,7 +197,7 @@ export default async function PortfolioPage({
                     <div key={index}>
                       <h3 className="font-medium text-foreground mb-2">{item.category}</h3>
                       <div className="flex flex-wrap gap-2">
-                        {item.skills.map((skill, i) => (
+                        {item.skills?.map((skill, i) => (
                           <Badge key={i} variant="secondary">
                             {skill}
                           </Badge>
@@ -216,7 +249,7 @@ export default async function PortfolioPage({
                     <p className="text-muted-foreground mt-1">{item.description}</p>
                     <div className="flex justify-between items-center mt-2">
                       <div className="flex gap-2">
-                        {item.tags.map((tag, i) => (
+                        {item.tags?.map((tag, i) => (
                           <Badge key={i} variant="outline">{tag}</Badge>
                         ))}
                       </div>

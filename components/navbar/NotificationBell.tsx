@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -22,9 +21,6 @@ type Notification = {
   friendRequestStatus?: 'PENDING' | 'ACCEPTED' | 'REJECTED';
 };
 
-type FriendRequestStatus = {
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
-};
 
 export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -90,6 +86,7 @@ export function NotificationBell() {
 
       toast.success(`Friend request ${action}ed successfully!`);
     } catch (error) {
+      console.log(error)
       toast.error(`Failed to ${action} friend request`);
     }
   };
@@ -98,7 +95,7 @@ export function NotificationBell() {
     <Popover open={isOpen} onOpenChange={handlePopoverChange}>
       <PopoverTrigger asChild>
         <Button variant="ghost" className="relative">
-          <Bell className="w-6 h-6" />
+          <Bell />
           {unreadCount > 0 && (
             <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
               {unreadCount}

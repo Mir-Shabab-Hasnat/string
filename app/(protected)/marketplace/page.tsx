@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,8 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Metadata } from "next"
-import MarketplaceContent from "@/components/marketplace/MarketplaceContent"
 import { toast } from "sonner";
 import { ShoppingCart } from "lucide-react";
 import { CartDialog } from "./components/CartDialog";
@@ -46,7 +44,7 @@ export default function Marketplace() {
   const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null);
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
@@ -55,15 +53,14 @@ export default function Marketplace() {
       const response = await fetch(`/api/marketplace?${params}`);
       const data = await response.json();
       
-      // Initialize as empty array if data is null/undefined
       setItems(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching items:', error);
-      setItems([]); // Set empty array on error
+      setItems([]); 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [search, category, setItems, setIsLoading]);
 
   const fetchCartCount = async () => {
     try {
@@ -111,7 +108,7 @@ export default function Marketplace() {
   useEffect(() => {
     fetchItems();
     fetchCartCount();
-  }, [search, category]);
+  }, [fetchItems]);
 
   return (
     <div className="container mx-auto py-8">

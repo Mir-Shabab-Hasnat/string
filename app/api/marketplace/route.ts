@@ -74,7 +74,25 @@ export async function GET(request: Request) {
     const category = searchParams.get('category');
     const search = searchParams.get('search');
     
-    let query: any = {
+    const query: {
+      where: {
+        category?: ItemCategory;
+        OR?: Array<{
+          title: { contains: string; mode: 'insensitive' };
+        } | {
+          description: { contains: string; mode: 'insensitive' };
+        }>;
+      };
+      include: {
+        seller: {
+          select: {
+            firstName: boolean;
+            lastName: boolean;
+            profilePicture: boolean;
+          };
+        };
+      };
+    } = {
       where: {},
       include: {
         seller: {
@@ -88,7 +106,7 @@ export async function GET(request: Request) {
     };
 
     if (category && category !== 'ALL') {
-      query.where.category = category;
+      query.where.category = category as ItemCategory;
     }
 
     if (search) {
@@ -104,7 +122,7 @@ export async function GET(request: Request) {
       ...item,
       seller: {
         name: `${item.seller?.firstName} ${item.seller?.lastName}`,
-        image: item.seller?.profilePicture || '/default-avatar.png'
+        image: item.seller?.profilePicture
       }
     }));
 

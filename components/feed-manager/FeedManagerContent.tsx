@@ -92,7 +92,7 @@ export default function FeedManagerContent({ initialPreferences }: FeedManagerCo
         <div className="space-y-2">
           <h3 className="font-medium">Selected Tags</h3>
           <p className="text-sm text-muted-foreground">
-            Choose the tags you're interested in to customize your feed content
+            Choose the tags you&apos;re interested in to customize your feed content
           </p>
         </div>
 

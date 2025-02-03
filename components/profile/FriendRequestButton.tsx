@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { UserPlus, UserCheck, UserX, Loader2, UserCircleIcon } from "lucide-react";
+import { UserPlus, UserCheck, Loader2, UserCircleIcon } from "lucide-react";
 import { toast } from "sonner";
 
 type FriendStatus = {
@@ -13,11 +13,7 @@ export function FriendRequestButton({ userId }: { userId: string }) {
   const [status, setStatus] = useState<FriendStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    fetchFriendStatus();
-  }, [userId]);
-
-  const fetchFriendStatus = async () => {
+  const fetchFriendStatus = useCallback(async () => {
     try {
       const response = await fetch(`/api/friend-request/status?userId=${userId}`);
       const data = await response.json();
@@ -25,7 +21,11 @@ export function FriendRequestButton({ userId }: { userId: string }) {
     } catch (error) {
       console.error("Error fetching friend status:", error);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    fetchFriendStatus();
+  }, [userId, fetchFriendStatus]);
 
   const sendFriendRequest = async () => {
     setIsLoading(true);
@@ -45,6 +45,7 @@ export function FriendRequestButton({ userId }: { userId: string }) {
       });
       toast.success("Friend request sent successfully!");
     } catch (error) {
+      console.log(error)
       toast.error("Failed to send friend request");
     } finally {
       setIsLoading(false);

@@ -10,7 +10,7 @@ interface PostWithUser extends Post {
     id: string;
     firstName: string;
     lastName: string;
-    profilePicture: string;
+    profilePicture: string | null;
     username: string;
   };
   tags: string[];
@@ -27,7 +27,11 @@ interface PostWithUser extends Post {
   }[];
 }
 
-export default function PostFeed() {
+interface UserPostsFeedProps {
+  userId: string;
+}
+
+export default function UserPostsFeed({ userId }: UserPostsFeedProps) {
   const [posts, setPosts] = useState<PostWithUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +39,6 @@ export default function PostFeed() {
   const [page, setPage] = useState(1);
   const [isFetching, setIsFetching] = useState(false);
   
-  // Setup intersection observer
   const { ref, inView } = useInView();
 
   const fetchPosts = useCallback(async (pageNum: number) => {
@@ -43,7 +46,7 @@ export default function PostFeed() {
     
     setIsFetching(true);
     try {
-      const response = await fetch(`/api/posts/user-posts?page=${pageNum}&limit=5`);
+      const response = await fetch(`/api/posts/user-specific-posts?userId=${userId}&page=${pageNum}&limit=5`);
       if (!response.ok) {
         throw new Error('Failed to fetch posts');
       }
@@ -67,11 +70,14 @@ export default function PostFeed() {
       setIsLoading(false);
       setIsFetching(false);
     }
-  }, [hasMore, isFetching]);
+  }, [hasMore, isFetching, userId]);
 
   useEffect(() => {
+    setPage(1);
+    setPosts([]);
+    setHasMore(true);
     fetchPosts(1);
-  }, [fetchPosts]);
+  }, [userId, fetchPosts]);
 
   useEffect(() => {
     if (inView && hasMore && !isLoading && !isFetching) {
@@ -89,48 +95,45 @@ export default function PostFeed() {
 
   if (posts.length === 0 && !isLoading) {
     return (
-      <div className="text-center text-gray-500 py-4">
-        No posts found
+      <div className="text-center text-muted-foreground py-4">
+        No posts yet
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <PostComponent
-            key={post.id}
-            post={{
-              id: post.id,
-              content: post.content,
-              imageUrl: post.imageUrl,
-              createdAt: post.createdAt.toString(),
-              userId: post.userId,
-              user: {
-                id: post.user.id,
-                firstName: post.user.firstName,
-                lastName: post.user.lastName,
-                profilePicture: post.user.profilePicture,
-              },
-              tags: post.tags || [],
-            }}
-          />
-        ))}
-        
-        {/* Loading indicator */}
-        <div ref={ref} className="py-4">
-          {isLoading && (
-            <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-            </div>
-          )}
-          {!hasMore && posts.length > 0 && (
-            <div className="text-center text-gray-500">
-              No more posts to load
-            </div>
-          )}
-        </div>
+    <div className="space-y-4">
+      {posts.map((post) => (
+        <PostComponent
+          key={post.id}
+          post={{
+            id: post.id,
+            content: post.content,
+            imageUrl: post.imageUrl,
+            createdAt: post.createdAt.toString(),
+            userId: post.userId,
+            user: {
+              id: post.user.id,
+              firstName: post.user.firstName,
+              lastName: post.user.lastName,
+              profilePicture: post.user.profilePicture || null,
+            },
+            tags: post.tags || [],
+          }}
+        />
+      ))}
+      
+      <div ref={ref} className="py-4">
+        {isLoading && (
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+          </div>
+        )}
+        {!hasMore && posts.length > 0 && (
+          <div className="text-center text-muted-foreground">
+            No more posts to load
+          </div>
+        )}
       </div>
     </div>
   );

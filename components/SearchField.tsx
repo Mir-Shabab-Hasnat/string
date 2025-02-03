@@ -9,7 +9,7 @@ import { useDebounce } from "../hooks/useDebounce";
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
+ 
   PopoverAnchor,
 } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

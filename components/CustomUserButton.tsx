@@ -11,8 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Bell } from "lucide-react"
-import { Button } from "./ui/button"
 
 export default function CustomUserButton() {
   const { user } = useUser()

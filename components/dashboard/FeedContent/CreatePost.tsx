@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -40,7 +40,8 @@ import { tags } from "@/lib/constants/tags";
 import LinkUserAvatar from "@/components/LinkUserAvatar";
 import { createPostSchema, type CreatePostData } from "@/schemas/post.schema";
 import { UploadButton } from "@/components/ui/uploadthing";
-import Image from "next/image";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const CreatePost = () => {
   const { user } = useUser();
@@ -144,12 +145,14 @@ const CreatePost = () => {
                     <Label>Attachments</Label>
                     {previewUrl && (
                       <div className="relative w-full h-48 rounded-lg overflow-hidden mb-2">
-                        <Image
-                          src={previewUrl}
-                          alt="Upload preview"
-                          fill
-                          className="object-cover"
-                        />
+                        <Avatar className="w-full h-full">
+                          <AvatarImage
+                            src={previewUrl}
+                            alt="Upload preview"
+                            className="object-cover"
+                          />
+                          <AvatarFallback>P</AvatarFallback>
+                        </Avatar>
                         <Button
                           variant="destructive"
                           size="sm"

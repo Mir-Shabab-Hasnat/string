@@ -8,8 +8,13 @@ import CustomUserButton from "./CustomUserButton"
 import { NotificationBell } from "./navbar/NotificationBell"
 import { ChatButton } from "./navbar/ChatButton"
 import { FeedManagerButton } from "./navbar/FeedManagerButton"
-import { Store } from "lucide-react"
+import { Menu, Store } from "lucide-react"
 import { Button } from "./ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu"
 
 export default function Navbar() {
   return (
@@ -32,10 +37,42 @@ export default function Navbar() {
                 <Store className="h-5 w-5" />
               </Link>
             </Button>
-            <ThemeToggle />
-            <NotificationBell />
-            <ChatButton />
-            <FeedManagerButton />
+            
+            {/* Mobile dropdown menu */}
+            <div className="md:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <div className="flex flex-col gap-2 p-2">
+                    <div className="inline-flex justify-center">
+                      <ThemeToggle />
+                    </div>
+                    <div className="inline-flex justify-center">
+                      <NotificationBell />
+                    </div>
+                    <div className="inline-flex justify-center">
+                      <ChatButton />
+                    </div>
+                    <div className="inline-flex justify-center">
+                      <FeedManagerButton />
+                    </div>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Desktop buttons */}
+            <div className="hidden md:flex md:items-center md:gap-4">
+              <ThemeToggle />
+              <NotificationBell />
+              <ChatButton />
+              <FeedManagerButton />
+            </div>
+            
             <CustomUserButton />
           </div>
         </div>
@@ -43,4 +80,6 @@ export default function Navbar() {
     </header>
   )
 }
+
+
 

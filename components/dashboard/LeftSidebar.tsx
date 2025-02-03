@@ -1,13 +1,13 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { useUser } from "@clerk/nextjs"
-import { MessageSquare, Settings, Store, TagsIcon } from "lucide-react"
+import {Store, TagsIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "../ui/button"
-import { ChatButton } from "../navbar/ChatButton"
 import React from "react"
+
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 
 interface NavItem {
   label: string
@@ -22,7 +22,7 @@ interface UserProfile {
 }
 
 export default function LeftSidebar() {
-  const { user } = useUser()
+
   const pathname = usePathname()
 
   // Fetch user profile from the API
@@ -63,11 +63,14 @@ export default function LeftSidebar() {
       {/* User Profile Section */}
       <div className="flex flex-col items-center space-y-4 pb-6 border-b">
         <div className="w-20 h-20 rounded-full overflow-hidden">
-          <img
-            src={userProfile?.profilePicture || '/default-avatar.png'}
-            alt="Profile"
-            className="w-full h-full object-cover"
-          />
+          <Avatar className="w-20 h-20">
+            <AvatarImage
+              src={userProfile?.profilePicture || '/default-avatar.png'} 
+              alt={`${userProfile?.firstName || 'User'}'s profile`}
+              className="object-cover"
+            />
+            <AvatarFallback>{userProfile?.firstName?.[0] || "U"}</AvatarFallback>
+          </Avatar>
         </div>
         <div className="text-center">
           <h2 className="font-semibold text-lg">

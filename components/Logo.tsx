@@ -1,4 +1,5 @@
 import { Ribbon } from 'lucide-react';
+import Link from 'next/link';
 import React from 'react'
 
 const Logo = ({ size }: { size: number }) => {
@@ -42,12 +43,12 @@ const Logo = ({ size }: { size: number }) => {
 
   export const LogoMobile = () => {
     return (
-      <a href='/' className='flex items-center gap-2'>
+      <Link href='/' className='flex items-center gap-2'>
           
           <p className='bg-gradient-to-r from-indigo-400 to-indigo-600 dark:from-indigo-50 dark:to-indigo-300 bg-clip-text text-3xl font-bold leading-tight tracking-tighter text-transparent'>
               Verse
           </p>
-      </a>
+      </Link>
     )
   }
   

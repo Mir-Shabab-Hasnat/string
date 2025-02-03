@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
@@ -43,11 +43,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json(cartItem);
   } catch (error) {
+    console.error(error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const user = await currentUser();
     if (!user) {
@@ -67,6 +68,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(cart);
   } catch (error) {
+    console.log(error)
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
 } 

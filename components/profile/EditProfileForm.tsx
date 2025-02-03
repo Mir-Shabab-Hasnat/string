@@ -17,10 +17,11 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { User } from "@prisma/client";
 import { UploadButton } from "@/components/ui/uploadthing";
-import Image from "next/image";
+
 import { useState } from "react";
 import { updateProfileSchema } from "@/schemas/user.schema";
 import { z } from "zod";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface EditProfileFormProps {
   user: User;
@@ -85,12 +86,14 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
               <div className="flex items-center gap-4">
                 {imageUrl && (
                   <div className="relative w-24 h-24 rounded-full overflow-hidden border border-border">
-                    <Image
-                      src={imageUrl}
-                      alt="Profile picture"
-                      fill
-                      className="object-cover"
-                    />
+                    <Avatar className="w-24 h-24">
+                      <AvatarImage
+                        src={imageUrl}
+                        alt="Profile picture"
+                        className="object-cover"
+                      />
+                      <AvatarFallback>P</AvatarFallback>
+                    </Avatar>
                   </div>
                 )}
                 <UploadButton

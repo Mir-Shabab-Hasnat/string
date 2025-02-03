@@ -1,14 +1,10 @@
 "use client"
 
 import { useUser } from "@clerk/nextjs"
-import { useRouter } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import { useQuery } from "@tanstack/react-query"
-import { User } from "@prisma/client"
 import { cn } from "@/lib/utils"
 
-import { User2 } from "lucide-react"
 import Link from "next/link"
 
 interface LinkUserAvatarProps {
@@ -19,7 +15,6 @@ interface LinkUserAvatarProps {
 
 export default function LinkUserAvatar({ userId, size = "md", imageUrl }: LinkUserAvatarProps) {
   const { user } = useUser()
-  const router = useRouter()
 
   const { data: dbUser } = useQuery({
     queryKey: ['user', user?.id],

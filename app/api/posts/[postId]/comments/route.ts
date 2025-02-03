@@ -3,11 +3,11 @@ import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { postId: string } }
+  request: Request,
+  { params }: { params: Promise<{ postId: string }> }
 ) {
-  const {postId} = await params
   try {
+    const { postId } = await params;
     const comments = await prisma.comment.findMany({
       where: {
         postId: postId,
@@ -38,21 +38,22 @@ export async function GET(
 }
 
 export async function POST(
-  req: Request,
-  { params }: { params: { postId: string } }
+  request: Request,
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
+    const { postId } = await params;
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { content } = await req.json();
+    const { content } = await request.json();
 
     const comment = await prisma.comment.create({
       data: {
         content,
-        postId: params.postId,
+        postId: postId,
         userId: user.id,
       },
       include: {

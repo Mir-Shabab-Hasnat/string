@@ -28,11 +28,9 @@ model User {
   messages                                      Message[]            @relation("Messages")
   Notification                                  Notification[]
   Post                                          Post[]
+  PostAuthenticity                              PostAuthenticity[]
   feedPreferences                               UserFeedPreferences?
   conversations                                 Conversation[]       @relation("ConversationParticipants")
-
-  
-  PostAuthenticity PostAuthenticity[]
 }
 
 model Conversation {
@@ -154,9 +152,7 @@ model MarketplaceItem {
   clickCount  Int          @default(0)
   views       Int          @default(0)
   CartItem    CartItem[]
-
-  
-  seller User @relation(fields: [sellerId], references: [id])
+  seller      User         @relation(fields: [sellerId], references: [id])
 
   @@index([sellerId])
 }

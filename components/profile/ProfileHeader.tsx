@@ -1,11 +1,11 @@
 "use client";
 
-import { User, UserRole } from "@prisma/client";
+import { User } from "@prisma/client";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+
+
 import Link from "next/link";
-import { Edit, MessageSquare, MapPin, Calendar, Mail, BookOpen, Microscope, GraduationCap, Users, UserPlus, UserCheck, UserX } from "lucide-react";
+import { Edit, MessageSquare, MapPin, Calendar, Mail, BookOpen, Microscope, GraduationCap } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,10 +15,9 @@ import {
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/Badge"
-import { useState, useEffect } from "react";
+
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+
 import { FriendRequestButton } from "./FriendRequestButton";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -27,34 +26,6 @@ interface ProfileHeaderProps {
   isOwner: boolean;
 }
 
-// Temporary mock data for followers/following
-const mockConnections = [
-  {
-    id: "1",
-    firstName: "John",
-    lastName: "Doe",
-    username: "johndoe",
-    profilePicture: "/default-avatar.png",
-    role: "STUDENT",
-    organisation: "MIT"
-  },
-  {
-    id: "2",
-    firstName: "Jane",
-    lastName: "Smith",
-    username: "janesmith",
-    profilePicture: "/default-avatar.png",
-    role: "PROFESSIONAL",
-    organisation: "Google"
-  },
-  // Add more mock users as needed
-]
-
-type FriendStatus = {
-  status: 'NONE' | 'PENDING' | 'ACCEPTED' | 'REJECTED';
-  requestId: string | null;
-  isOutgoing: boolean;
-};
 
 interface Friend {
   id: string;
@@ -76,22 +47,25 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
       icon: GraduationCap,
       text: "Student Portfolio",
       color: "text-blue-600 hover:text-blue-700",
+      href: `${user.id}/portfolio`,
     },
     PROFESSIONAL: {
       icon: BookOpen,
       text: "Professional Portfolio",
       color: "text-purple-600 hover:text-purple-700",
+      href: `/portfolio/${user.id}`,
     },
     ACADEMIC: {
       icon: Microscope,
       text: "Academic Portfolio",
       color: "text-emerald-600 hover:text-emerald-700",
+      href: `/portfolio/${user.id}`,
     },
   }
 
   const RoleIcon = roleConfig[user.role].icon;
 
-  const { data: friendCount, isLoading, error } = useQuery({
+  const { data: friendCount } = useQuery({
     queryKey: ["friendCount", user.id],
     queryFn: async () => {
       const res = await fetch(`/api/user/${user.id}/friends/count`);
@@ -144,17 +118,14 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
           <div className="flex flex-col items-center lg:items-start gap-6">
             {/* Avatar Container with Border */}
             <div className="relative group">
-              {/* Profile Picture */}
-              <div className="relative w-40 h-40 rounded-full overflow-hidden ring-4 ring-background shadow-xl">
-                <Image
+              <Avatar className="w-40 h-40 ring-4 ring-background shadow-xl">
+                <AvatarImage
                   src={user.profilePicture || "/default-avatar.png"}
-                  alt={`${user.firstName}'s profile picture`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  priority
+                  alt={`${user.firstName}'s profile`}
+                  className="object-cover w-full h-full"
                 />
-              </div>
+                <AvatarFallback>{user.firstName?.[0] || "U"}</AvatarFallback>
+              </Avatar>
               
               {/* Status Indicator - Optional */}
               <div className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 rounded-full ring-4 ring-background" />
@@ -174,7 +145,7 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
                       Edit Profile
                     </Button>
                   </Link>
-                  <Link href={`/profile/${user.id}/portfolio`} className="w-full">
+                  <Link href={roleConfig[user.role].href} className="w-full">
                     <Button 
                       variant="outline" 
                       size="lg" 
@@ -196,7 +167,7 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
                     <MessageSquare className="w-4 h-4" />
                     Message
                   </Button>
-                  <Link href={`/profile/${user.id}/portfolio`} className="w-full">
+                  <Link href={roleConfig[user.role].href} className="w-full">
                     <Button 
                       variant="outline" 
                       size="lg" 
