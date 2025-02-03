@@ -7,12 +7,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const user = await currentUser();
-    if (!user) {
+
+    if (!user || user.id !== id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
     const notification = await prisma.notification.update({
       where: {
         id: id,

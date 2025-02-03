@@ -47,16 +47,19 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
       icon: GraduationCap,
       text: "Student Portfolio",
       color: "text-blue-600 hover:text-blue-700",
+      href: `${user.id}/portfolio`,
     },
     PROFESSIONAL: {
       icon: BookOpen,
       text: "Professional Portfolio",
       color: "text-purple-600 hover:text-purple-700",
+      href: `/portfolio/${user.id}`,
     },
     ACADEMIC: {
       icon: Microscope,
       text: "Academic Portfolio",
       color: "text-emerald-600 hover:text-emerald-700",
+      href: `/portfolio/${user.id}`,
     },
   }
 
@@ -142,7 +145,7 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
                       Edit Profile
                     </Button>
                   </Link>
-                  <Link href={`/profile/${user.id}/portfolio`} className="w-full">
+                  <Link href={roleConfig[user.role].href} className="w-full">
                     <Button 
                       variant="outline" 
                       size="lg" 
@@ -164,7 +167,7 @@ export default function ProfileHeader({ user, isOwner }: ProfileHeaderProps) {
                     <MessageSquare className="w-4 h-4" />
                     Message
                   </Button>
-                  <Link href={`/profile/${user.id}/portfolio`} className="w-full">
+                  <Link href={roleConfig[user.role].href} className="w-full">
                     <Button 
                       variant="outline" 
                       size="lg" 

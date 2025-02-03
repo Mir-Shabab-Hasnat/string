@@ -148,7 +148,9 @@ export default async function PortfolioPage({
             <Image
                 src={profile.profilePicture || "/default-avatar.png"}
                 alt={`${profile.firstName}'s profile`}
-                fill
+                
+                width={400}
+                height={400}
                 className="rounded-full object-cover border-4 border-white shadow-xl"
               />
             
