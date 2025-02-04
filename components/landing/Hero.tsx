@@ -33,7 +33,7 @@ export function Hero() {
         <div className="relative items-center w-full py-12 lg:py-20">
           <div className="text-center">
             <span className="text-sm text-indigo-300 font-medium tracking-tight bg-primary/10 px-4 py-2 rounded-full">
-              Ultimate Micro Learning Platform
+              One Stop Hub for STEM Content & Community
             </span>
 
             <h1 className="mt-8 text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-medium leading-none">
